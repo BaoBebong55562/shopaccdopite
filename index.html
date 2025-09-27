@@ -712,70 +712,206 @@
     </div>
 
     <script>
-        // Sample data
-        const products = [
-            {
-                id: 1,
-                name: "Tài khoản Liên Quân VIP",
-                game: "Liên Quân Mobile",
-                price: 250000,
-                rank: "Cao Thủ",
-                skins: 45,
-                description: "Tài khoản Liên Quân Mobile rank Cao Thủ với 45 skin đẹp, tướng đầy đủ",
-                image: "🎮",
-                rating: 4.8,
-                reviews: 124,
-                username: "lienquan_vip001",
-                password: "LQ2024@VIP",
-                sold: false
-            },
-            {
-                id: 2,
-                name: "PUBG Mobile Conqueror",
-                game: "PUBG Mobile",
-                price: 450000,
-                rank: "Conqueror",
-                skins: 23,
-                description: "Tài khoản PUBG Mobile rank Conqueror, nhiều skin súng và outfit hiếm",
-                image: "🔫",
-                rating: 4.9,
-                reviews: 89,
-                username: "pubg_conqueror_pro",
-                password: "PUBG2024#Pro",
-                sold: false
-            },
-            {
-                id: 3,
-                name: "Free Fire Heroic",
-                game: "Free Fire",
-                price: 180000,
-                rank: "Heroic",
-                skins: 67,
-                description: "Tài khoản Free Fire rank Heroic với collection skin đầy đủ",
-                image: "🔥",
-                rating: 4.7,
-                reviews: 156,
-                username: "freefire_heroic99",
-                password: "FF2024$Hero",
-                sold: false
-            },
-            {
-                id: 4,
-                name: "Mobile Legends Mythic",
-                game: "Mobile Legends",
-                price: 320000,
-                rank: "Mythic",
-                skins: 38,
-                description: "Tài khoản Mobile Legends rank Mythic, hero và skin premium",
-                image: "⚔️",
-                rating: 4.8,
-                reviews: 92,
-                username: "ml_mythic_legend",
-                password: "ML2024&Mythic",
-                sold: false
-            }
-        ];
+        // Data Storage System - Sử dụng localStorage để lưu trữ dữ liệu toàn cục
+        const STORAGE_KEYS = {
+            PRODUCTS: 'gameshop_products',
+            USERS: 'gameshop_users',
+            ORDERS: 'gameshop_orders',
+            RECHARGE_REQUESTS: 'gameshop_recharge_requests',
+            STATS: 'gameshop_stats'
+        };
 
+        // Initialize data from localStorage or use default data
+        function initializeData() {
+            // Load products
+            const savedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
+            if (savedProducts) {
+                products.splice(0, products.length, ...JSON.parse(savedProducts));
+            } else {
+                // Default products
+                const defaultProducts = [
+                    {
+                        id: 1,
+                        name: "Tài khoản Liên Quân VIP",
+                        game: "Liên Quân Mobile",
+                        price: 250000,
+                        rank: "Cao Thủ",
+                        skins: 45,
+                        description: "Tài khoản Liên Quân Mobile rank Cao Thủ với 45 skin đẹp, tướng đầy đủ",
+                        image: "🎮",
+                        rating: 4.8,
+                        reviews: 124,
+                        username: "lienquan_vip001",
+                        password: "LQ2024@VIP",
+                        sold: false
+                    },
+                    {
+                        id: 2,
+                        name: "PUBG Mobile Conqueror",
+                        game: "PUBG Mobile",
+                        price: 450000,
+                        rank: "Conqueror",
+                        skins: 23,
+                        description: "Tài khoản PUBG Mobile rank Conqueror, nhiều skin súng và outfit hiếm",
+                        image: "🔫",
+                        rating: 4.9,
+                        reviews: 89,
+                        username: "pubg_conqueror_pro",
+                        password: "PUBG2024#Pro",
+                        sold: false
+                    },
+                    {
+                        id: 3,
+                        name: "Free Fire Heroic",
+                        game: "Free Fire",
+                        price: 180000,
+                        rank: "Heroic",
+                        skins: 67,
+                        description: "Tài khoản Free Fire rank Heroic với collection skin đầy đủ",
+                        image: "🔥",
+                        rating: 4.7,
+                        reviews: 156,
+                        username: "freefire_heroic99",
+                        password: "FF2024$Hero",
+                        sold: false
+                    },
+                    {
+                        id: 4,
+                        name: "Mobile Legends Mythic",
+                        game: "Mobile Legends",
+                        price: 320000,
+                        rank: "Mythic",
+                        skins: 38,
+                        description: "Tài khoản Mobile Legends rank Mythic, hero và skin premium",
+                        image: "⚔️",
+                        rating: 4.8,
+                        reviews: 92,
+                        username: "ml_mythic_legend",
+                        password: "ML2024&Mythic",
+                        sold: false
+                    }
+                ];
+                products.push(...defaultProducts);
+                saveData(STORAGE_KEYS.PRODUCTS, products);
+            }
+
+            // Load users
+            const savedUsers = localStorage.getItem(STORAGE_KEYS.USERS);
+            if (savedUsers) {
+                users.splice(0, users.length, ...JSON.parse(savedUsers));
+            }
+
+            // Load orders
+            const savedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
+            if (savedOrders) {
+                orders.splice(0, orders.length, ...JSON.parse(savedOrders));
+            }
+
+            // Load recharge requests
+            const savedRechargeRequests = localStorage.getItem(STORAGE_KEYS.RECHARGE_REQUESTS);
+            if (savedRechargeRequests) {
+                rechargeRequests.splice(0, rechargeRequests.length, ...JSON.parse(savedRechargeRequests));
+            }
+
+            // Load stats
+            const savedStats = localStorage.getItem(STORAGE_KEYS.STATS);
+            if (savedStats) {
+                const stats = JSON.parse(savedStats);
+                totalRevenue = stats.totalRevenue || 0;
+                todayOrders = stats.todayOrders || 0;
+            }
+        }
+
+        // Save data to localStorage
+        function saveData(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+                
+                // Trigger storage event for other tabs/windows
+                window.dispatchEvent(new StorageEvent('storage', {
+                    key: key,
+                    newValue: JSON.stringify(data),
+                    url: window.location.href
+                }));
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showNotification('Lỗi lưu dữ liệu!', 'error');
+            }
+        }
+
+        // Save stats
+        function saveStats() {
+            const stats = {
+                totalRevenue,
+                todayOrders,
+                lastUpdated: new Date().toISOString()
+            };
+            saveData(STORAGE_KEYS.STATS, stats);
+        }
+
+        // Listen for storage changes from other tabs/windows
+        window.addEventListener('storage', function(e) {
+            if (e.key === STORAGE_KEYS.USERS) {
+                // Update users array when changed from another tab
+                const newUsers = JSON.parse(e.newValue || '[]');
+                users.splice(0, users.length, ...newUsers);
+                
+                // Update current user if exists
+                if (currentUser) {
+                    const updatedUser = users.find(u => u.id === currentUser.id);
+                    if (updatedUser) {
+                        currentUser = updatedUser;
+                        updateUserBalance();
+                    }
+                }
+                
+                // Refresh admin displays if on admin page
+                if (currentUser && currentUser.role === 'admin') {
+                    loadAdminUsers();
+                    updateAdminStats();
+                }
+            } else if (e.key === STORAGE_KEYS.ORDERS) {
+                const newOrders = JSON.parse(e.newValue || '[]');
+                orders.splice(0, orders.length, ...newOrders);
+                
+                if (currentUser && currentUser.role === 'admin') {
+                    loadAdminOrders();
+                    updateAdminStats();
+                }
+            } else if (e.key === STORAGE_KEYS.RECHARGE_REQUESTS) {
+                const newRequests = JSON.parse(e.newValue || '[]');
+                rechargeRequests.splice(0, rechargeRequests.length, ...newRequests);
+                
+                if (currentUser && currentUser.role === 'admin') {
+                    loadRechargeRequests();
+                }
+            } else if (e.key === STORAGE_KEYS.PRODUCTS) {
+                const newProducts = JSON.parse(e.newValue || '[]');
+                products.splice(0, products.length, ...newProducts);
+                
+                // Refresh product displays
+                if (document.getElementById('products-page').classList.contains('fade-in')) {
+                    loadProducts();
+                }
+                if (document.getElementById('home-page').classList.contains('fade-in')) {
+                    loadFeaturedProducts();
+                }
+                if (currentUser && currentUser.role === 'admin') {
+                    loadAdminProducts();
+                }
+            } else if (e.key === STORAGE_KEYS.STATS) {
+                const newStats = JSON.parse(e.newValue || '{}');
+                totalRevenue = newStats.totalRevenue || 0;
+                todayOrders = newStats.todayOrders || 0;
+                
+                if (currentUser && currentUser.role === 'admin') {
+                    updateAdminStats();
+                }
+            }
+        });
+
+        // Initialize arrays
+        let products = [];
         let cart = [];
         let currentUser = null;
         let orders = [];
@@ -786,6 +922,9 @@
 
         // Initialize app
         function initApp() {
+            // Initialize data from localStorage first
+            initializeData();
+            
             if (!currentUser) {
                 showPage('login-required');
             } else {
@@ -1319,8 +1458,23 @@
                     // Find existing user or create new one
                     let user = users.find(u => u.email === email);
                     if (!user) {
-                        user = { email, role: 'user', name: 'Người dùng', id: Date.now(), balance: 0 };
+                        user = { 
+                            email, 
+                            role: 'user', 
+                            name: 'Người dùng', 
+                            id: Date.now(), 
+                            balance: 0,
+                            createdAt: new Date().toISOString(),
+                            lastLogin: new Date().toISOString()
+                        };
                         users.push(user);
+                        // Save to localStorage immediately
+                        saveData(STORAGE_KEYS.USERS, users);
+                        showNotification('Tài khoản mới đã được tạo!', 'success');
+                    } else {
+                        // Update last login
+                        user.lastLogin = new Date().toISOString();
+                        saveData(STORAGE_KEYS.USERS, users);
                     }
                     currentUser = user;
                     updateUserMenu();
@@ -1339,9 +1493,37 @@
             e.preventDefault();
             const name = this.querySelector('input[type="text"]').value;
             const email = this.querySelector('input[type="email"]').value;
+            const phone = this.querySelector('input[type="tel"]').value;
+            const password = this.querySelector('input[type="password"]').value;
+            const confirmPassword = this.querySelectorAll('input[type="password"]')[1].value;
             
-            const newUser = { email, role: 'user', name, id: Date.now(), balance: 0 };
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                showNotification('Mật khẩu xác nhận không khớp!', 'error');
+                return;
+            }
+            
+            // Check if user already exists
+            if (users.find(u => u.email === email)) {
+                showNotification('Email này đã được sử dụng!', 'error');
+                return;
+            }
+            
+            const newUser = { 
+                email, 
+                role: 'user', 
+                name, 
+                phone,
+                id: Date.now(), 
+                balance: 0,
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            };
+            
             users.push(newUser);
+            // Save to localStorage immediately
+            saveData(STORAGE_KEYS.USERS, users);
+            
             currentUser = newUser;
             updateUserMenu();
             showPage('home');
@@ -1361,6 +1543,12 @@
             // Deduct balance
             currentUser.balance -= total;
             
+            // Update user in users array
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex] = currentUser;
+            }
+            
             // Mark products as sold
             cart.forEach(cartItem => {
                 const product = products.find(p => p.id === cartItem.id);
@@ -1376,7 +1564,9 @@
                 items: [...cart],
                 total: total,
                 status: 'completed',
-                userId: currentUser.id
+                userId: currentUser.id,
+                userEmail: currentUser.email,
+                userName: currentUser.name
             };
             
             orders.push(order);
@@ -1387,7 +1577,12 @@
             // Update admin stats
             totalRevenue += total;
             todayOrders += 1;
-            updateAdminStats();
+            
+            // Save all data to localStorage
+            saveData(STORAGE_KEYS.USERS, users);
+            saveData(STORAGE_KEYS.ORDERS, orders);
+            saveData(STORAGE_KEYS.PRODUCTS, products);
+            saveStats();
             
             showNotification('Thanh toán thành công!', 'success');
             showPage('orders');
@@ -1406,15 +1601,19 @@
                 amount: amount,
                 note: note,
                 status: 'pending',
-                date: new Date().toLocaleDateString('vi-VN')
+                date: new Date().toLocaleDateString('vi-VN'),
+                createdAt: new Date().toISOString()
             };
             
             rechargeRequests.push(request);
+            // Save to localStorage immediately
+            saveData(STORAGE_KEYS.RECHARGE_REQUESTS, rechargeRequests);
+            
             closeRechargeModal();
             showNotification('Yêu cầu nạp tiền đã được gửi!', 'success');
             
-            // Update admin recharge requests display
-            loadRechargeRequests();
+            // Reset form
+            this.reset();
         });
 
         // Update user menu
@@ -1610,29 +1809,162 @@
             if (users.length === 0) {
                 container.innerHTML = `
                     <div class="text-center text-white/60 py-8">
-                        Chưa có người dùng nào
+                        <div class="text-4xl mb-4">👥</div>
+                        <p>Chưa có người dùng nào đăng ký</p>
+                        <p class="text-sm mt-2">Người dùng sẽ xuất hiện ở đây khi họ đăng ký tài khoản</p>
                     </div>
                 `;
                 return;
             }
             
-            container.innerHTML = users.map(user => `
-                <div class="bg-white/10 rounded-xl p-4 hover:bg-white/20 transition">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 class="font-semibold text-white">${user.name}</h4>
-                            <p class="text-white/70 text-sm">${user.email}</p>
-                            <p class="text-white/70 text-sm">Số dư: ${formatPrice(user.balance || 0)}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-white font-semibold">${user.role}</p>
+            // Sort users by creation date (newest first)
+            const sortedUsers = [...users].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+            
+            container.innerHTML = sortedUsers.map(user => {
+                const createdDate = user.createdAt ? new Date(user.createdAt).toLocaleDateString('vi-VN') : 'N/A';
+                const lastLoginDate = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString('vi-VN') : 'N/A';
+                const userOrders = orders.filter(order => order.userId === user.id);
+                const totalSpent = userOrders.reduce((sum, order) => sum + order.total, 0);
+                
+                return `
+                    <div class="bg-white/10 rounded-xl p-4 hover:bg-white/20 transition">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <div class="text-2xl mr-3">👤</div>
+                                    <div>
+                                        <h4 class="font-semibold text-white">${user.name}</h4>
+                                        <p class="text-white/70 text-sm">${user.email}</p>
+                                        ${user.phone ? `<p class="text-white/60 text-xs">📞 ${user.phone}</p>` : ''}
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3 text-xs">
+                                    <div class="bg-white/10 rounded p-2">
+                                        <div class="text-white/60">Số dư</div>
+                                        <div class="text-yellow-400 font-semibold">${formatPrice(user.balance || 0)}</div>
+                                    </div>
+                                    <div class="bg-white/10 rounded p-2">
+                                        <div class="text-white/60">Đã chi tiêu</div>
+                                        <div class="text-green-400 font-semibold">${formatPrice(totalSpent)}</div>
+                                    </div>
+                                    <div class="bg-white/10 rounded p-2">
+                                        <div class="text-white/60">Đơn hàng</div>
+                                        <div class="text-blue-400 font-semibold">${userOrders.length}</div>
+                                    </div>
+                                    <div class="bg-white/10 rounded p-2">
+                                        <div class="text-white/60">Ngày tạo</div>
+                                        <div class="text-white font-semibold">${createdDate}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right ml-4">
+                                <span class="px-2 py-1 rounded-full text-xs ${user.role === 'admin' ? 'bg-red-600' : 'bg-blue-600'} text-white">
+                                    ${user.role === 'admin' ? 'Admin' : 'User'}
+                                </span>
+                                <p class="text-white/60 text-xs mt-2">Đăng nhập: ${lastLoginDate}</p>
+                                <div class="mt-2 space-x-1">
+                                    <button onclick="quickRecharge(${user.id})" class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-xs transition">
+                                        💰 Nạp tiền
+                                    </button>
+                                    <button onclick="viewUserDetails(${user.id})" class="bg-blue-600 hover:bg-blue-700 px-2 py-1 rounded text-xs transition">
+                                        👁️ Chi tiết
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             
             // Update total users stat
             document.getElementById('total-users').textContent = users.length;
+        }
+
+        // Quick recharge function for admin
+        function quickRecharge(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            const amount = prompt(`Nạp tiền cho ${user.name} (${user.email}):\nNhập số tiền (VNĐ):`);
+            if (amount && !isNaN(amount) && parseInt(amount) > 0) {
+                const rechargeAmount = parseInt(amount);
+                user.balance = (user.balance || 0) + rechargeAmount;
+                
+                // Save to localStorage
+                saveData(STORAGE_KEYS.USERS, users);
+                
+                // Refresh displays
+                loadAdminUsers();
+                showNotification(`Đã nạp ${formatPrice(rechargeAmount)} cho ${user.name}`, 'success');
+            }
+        }
+
+        // View user details function
+        function viewUserDetails(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            const userOrders = orders.filter(order => order.userId === user.id);
+            const userRechargeRequests = rechargeRequests.filter(req => req.userId === user.id);
+            const totalSpent = userOrders.reduce((sum, order) => sum + order.total, 0);
+            
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-white">Chi tiết người dùng</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-white/60 hover:text-white text-2xl">×</button>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white/10 rounded-xl p-4">
+                            <h4 class="text-lg font-semibold text-white mb-3">Thông tin cá nhân</h4>
+                            <div class="space-y-2 text-sm">
+                                <div><span class="text-white/60">Tên:</span> <span class="text-white">${user.name}</span></div>
+                                <div><span class="text-white/60">Email:</span> <span class="text-white">${user.email}</span></div>
+                                ${user.phone ? `<div><span class="text-white/60">SĐT:</span> <span class="text-white">${user.phone}</span></div>` : ''}
+                                <div><span class="text-white/60">Vai trò:</span> <span class="text-white">${user.role}</span></div>
+                                <div><span class="text-white/60">Ngày tạo:</span> <span class="text-white">${new Date(user.createdAt || 0).toLocaleDateString('vi-VN')}</span></div>
+                                <div><span class="text-white/60">Đăng nhập cuối:</span> <span class="text-white">${new Date(user.lastLogin || 0).toLocaleDateString('vi-VN')}</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white/10 rounded-xl p-4">
+                            <h4 class="text-lg font-semibold text-white mb-3">Thống kê</h4>
+                            <div class="space-y-2 text-sm">
+                                <div><span class="text-white/60">Số dư:</span> <span class="text-yellow-400 font-semibold">${formatPrice(user.balance || 0)}</span></div>
+                                <div><span class="text-white/60">Tổng chi tiêu:</span> <span class="text-green-400 font-semibold">${formatPrice(totalSpent)}</span></div>
+                                <div><span class="text-white/60">Số đơn hàng:</span> <span class="text-blue-400 font-semibold">${userOrders.length}</span></div>
+                                <div><span class="text-white/60">Yêu cầu nạp tiền:</span> <span class="text-purple-400 font-semibold">${userRechargeRequests.length}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${userOrders.length > 0 ? `
+                        <div class="bg-white/10 rounded-xl p-4 mb-4">
+                            <h4 class="text-lg font-semibold text-white mb-3">Đơn hàng gần đây</h4>
+                            <div class="space-y-2 max-h-40 overflow-y-auto">
+                                ${userOrders.slice(0, 5).map(order => `
+                                    <div class="flex justify-between items-center text-sm bg-white/10 rounded p-2">
+                                        <span class="text-white">Đơn #${order.id}</span>
+                                        <span class="text-white/60">${order.date}</span>
+                                        <span class="text-yellow-400">${formatPrice(order.total)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="text-center">
+                        <button onclick="this.closest('.fixed').remove()" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg text-white transition">
+                            Đóng
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
         }
 
         function loadRechargeRequests() {
@@ -1684,6 +2016,7 @@
                 if (user) {
                     user.balance = (user.balance || 0) + request.amount;
                     request.status = 'completed';
+                    request.processedAt = new Date().toISOString();
                     
                     // Update current user balance if it's the same user
                     if (currentUser && currentUser.email === user.email) {
@@ -1691,16 +2024,26 @@
                         updateUserBalance();
                     }
                     
+                    // Save to localStorage
+                    saveData(STORAGE_KEYS.USERS, users);
+                    saveData(STORAGE_KEYS.RECHARGE_REQUESTS, rechargeRequests);
+                    
                     loadRechargeRequests();
+                    loadAdminUsers();
                     showNotification(`Đã nạp ${formatPrice(request.amount)} cho ${user.name}`, 'success');
                 }
             }
         }
 
         function rejectRecharge(requestId) {
-            const index = rechargeRequests.findIndex(r => r.id === requestId);
-            if (index !== -1) {
-                rechargeRequests.splice(index, 1);
+            const request = rechargeRequests.find(r => r.id === requestId);
+            if (request) {
+                request.status = 'rejected';
+                request.processedAt = new Date().toISOString();
+                
+                // Save to localStorage
+                saveData(STORAGE_KEYS.RECHARGE_REQUESTS, rechargeRequests);
+                
                 loadRechargeRequests();
                 showNotification('Đã từ chối yêu cầu nạp tiền', 'warning');
             }
@@ -1721,6 +2064,12 @@
                     currentUser.balance = user.balance;
                     updateUserBalance();
                 }
+                
+                // Save to localStorage
+                saveData(STORAGE_KEYS.USERS, users);
+                
+                // Refresh admin displays
+                loadAdminUsers();
                 
                 this.reset();
                 showNotification(`Đã nạp ${formatPrice(amount)} cho ${user.name}`, 'success');
@@ -1798,18 +2147,7 @@
             }
         }
 
-        function deleteProduct(id) {
-            if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
-                const index = products.findIndex(p => p.id === id);
-                if (index !== -1) {
-                    products.splice(index, 1);
-                    loadAdminProducts();
-                    loadFeaturedProducts();
-                    loadProducts();
-                    showNotification(`Đã xóa sản phẩm #${id}`, 'success');
-                }
-            }
-        }
+
 
         // Product form handler
         document.getElementById('product-form').addEventListener('submit', function(e) {
@@ -1849,15 +2187,35 @@
                 showNotification('Thêm sản phẩm mới thành công!', 'success');
             }
             
+            // Save to localStorage
+            saveData(STORAGE_KEYS.PRODUCTS, products);
+            
             closeProductModal();
             loadAdminProducts();
             loadFeaturedProducts();
             loadProducts();
         });
 
+        function deleteProduct(id) {
+            if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
+                const index = products.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    products.splice(index, 1);
+                    
+                    // Save to localStorage
+                    saveData(STORAGE_KEYS.PRODUCTS, products);
+                    
+                    loadAdminProducts();
+                    loadFeaturedProducts();
+                    loadProducts();
+                    showNotification(`Đã xóa sản phẩm #${id}`, 'success');
+                }
+            }
+        }
+
         // Initialize
         initApp();
         updateCartCount();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985c63c092dcdd61',t:'MTc1ODk5MDY2OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985c830c964284a2',t:'MTc1ODk5MTk1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
