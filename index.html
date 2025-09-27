@@ -712,9 +712,17 @@
     </div>
 
     <script>
-        // Global Data Storage System - Sử dụng localStorage với unique key để đồng bộ toàn cầu
-        const GLOBAL_STORAGE_KEY = 'gameshop_global_data_v2';
-        const SYNC_INTERVAL = 2000; // Đồng bộ mỗi 2 giây
+        // Global Data Storage System - Sử dụng multiple storage keys để đồng bộ cross-device
+        const STORAGE_KEYS = {
+            users: 'gameshop_users_global_v3',
+            products: 'gameshop_products_global_v3', 
+            orders: 'gameshop_orders_global_v3',
+            rechargeRequests: 'gameshop_recharge_global_v3',
+            stats: 'gameshop_stats_global_v3',
+            sync: 'gameshop_sync_global_v3'
+        };
+        
+        const SYNC_INTERVAL = 1000; // Đồng bộ mỗi 1 giây
         let syncTimer = null;
         let lastSyncTime = 0;
 
@@ -732,21 +740,16 @@
             lastModified: Date.now()
         };
 
-        // Initialize global data system
+        // Initialize global data system with cross-device sync
         function initializeGlobalData() {
-            // Load from localStorage first
-            const savedData = localStorage.getItem(GLOBAL_STORAGE_KEY);
-            if (savedData) {
-                try {
-                    const parsed = JSON.parse(savedData);
-                    globalData = { ...globalData, ...parsed };
-                } catch (error) {
-                    console.error('Error parsing saved data:', error);
-                }
-            }
+            console.log('🚀 Initializing cross-device global data system...');
+            
+            // Load each data type separately for better sync
+            loadGlobalData();
 
             // Initialize with default products if empty
             if (globalData.products.length === 0) {
+                console.log('📦 Creating default products...');
                 globalData.products = [
                     {
                         id: 1,
@@ -819,24 +822,93 @@
             // Sync local arrays with global data
             syncLocalData();
             
-            // Start periodic sync
+            // Start aggressive periodic sync for cross-device
             startPeriodicSync();
+            
+            console.log('✅ Cross-device sync system initialized');
         }
 
-        // Save global data to localStorage
+        // Load global data from multiple storage keys
+        function loadGlobalData() {
+            try {
+                // Load users
+                const usersData = localStorage.getItem(STORAGE_KEYS.users);
+                if (usersData) {
+                    globalData.users = JSON.parse(usersData);
+                    console.log(`👥 Loaded ${globalData.users.length} users from global storage`);
+                }
+
+                // Load products
+                const productsData = localStorage.getItem(STORAGE_KEYS.products);
+                if (productsData) {
+                    globalData.products = JSON.parse(productsData);
+                    console.log(`🎮 Loaded ${globalData.products.length} products from global storage`);
+                }
+
+                // Load orders
+                const ordersData = localStorage.getItem(STORAGE_KEYS.orders);
+                if (ordersData) {
+                    globalData.orders = JSON.parse(ordersData);
+                    console.log(`📦 Loaded ${globalData.orders.length} orders from global storage`);
+                }
+
+                // Load recharge requests
+                const rechargeData = localStorage.getItem(STORAGE_KEYS.rechargeRequests);
+                if (rechargeData) {
+                    globalData.rechargeRequests = JSON.parse(rechargeData);
+                    console.log(`💰 Loaded ${globalData.rechargeRequests.length} recharge requests from global storage`);
+                }
+
+                // Load stats
+                const statsData = localStorage.getItem(STORAGE_KEYS.stats);
+                if (statsData) {
+                    globalData.stats = JSON.parse(statsData);
+                    console.log(`📊 Loaded stats from global storage`);
+                }
+
+                // Load sync timestamp
+                const syncData = localStorage.getItem(STORAGE_KEYS.sync);
+                if (syncData) {
+                    const syncInfo = JSON.parse(syncData);
+                    globalData.lastModified = syncInfo.lastModified || Date.now();
+                    lastSyncTime = syncInfo.lastSyncTime || 0;
+                }
+            } catch (error) {
+                console.error('❌ Error loading global data:', error);
+            }
+        }
+
+        // Save global data to multiple localStorage keys for better cross-device sync
         function saveGlobalData() {
             try {
-                globalData.lastModified = Date.now();
-                localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(globalData));
+                const timestamp = Date.now();
+                globalData.lastModified = timestamp;
                 
-                // Trigger custom event for real-time sync
-                window.dispatchEvent(new CustomEvent('gameshop-data-updated', {
-                    detail: { timestamp: globalData.lastModified }
-                }));
+                // Save each data type separately
+                localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(globalData.users));
+                localStorage.setItem(STORAGE_KEYS.products, JSON.stringify(globalData.products));
+                localStorage.setItem(STORAGE_KEYS.orders, JSON.stringify(globalData.orders));
+                localStorage.setItem(STORAGE_KEYS.rechargeRequests, JSON.stringify(globalData.rechargeRequests));
+                localStorage.setItem(STORAGE_KEYS.stats, JSON.stringify(globalData.stats));
                 
-                console.log('✅ Data saved globally at:', new Date().toLocaleTimeString());
+                // Save sync info
+                const syncInfo = {
+                    lastModified: timestamp,
+                    lastSyncTime: timestamp,
+                    deviceId: navigator.userAgent.substring(0, 50) // Simple device fingerprint
+                };
+                localStorage.setItem(STORAGE_KEYS.sync, JSON.stringify(syncInfo));
+                
+                // Trigger multiple custom events for better cross-device detection
+                ['gameshop-users-updated', 'gameshop-products-updated', 'gameshop-orders-updated', 'gameshop-sync-updated'].forEach(eventName => {
+                    window.dispatchEvent(new CustomEvent(eventName, {
+                        detail: { timestamp, type: 'save' }
+                    }));
+                });
+                
+                console.log('✅ Cross-device data saved at:', new Date().toLocaleTimeString(), 'Users:', globalData.users.length, 'Products:', globalData.products.length);
             } catch (error) {
-                console.error('Error saving global data:', error);
+                console.error('❌ Error saving global data:', error);
                 showNotification('Lỗi lưu dữ liệu!', 'error');
             }
         }
@@ -860,40 +932,70 @@
             }
         }
 
-        // Check for updates and sync
+        // Check for updates and sync with aggressive cross-device detection
         function checkForUpdates() {
-            const savedData = localStorage.getItem(GLOBAL_STORAGE_KEY);
-            if (savedData) {
-                try {
-                    const parsed = JSON.parse(savedData);
-                    if (parsed.lastModified > lastSyncTime) {
-                        console.log('🔄 New data detected, syncing...');
-                        globalData = { ...globalData, ...parsed };
+            try {
+                let hasUpdates = false;
+                const currentTime = Date.now();
+                
+                // Check sync info first
+                const syncData = localStorage.getItem(STORAGE_KEYS.sync);
+                if (syncData) {
+                    const syncInfo = JSON.parse(syncData);
+                    if (syncInfo.lastModified > lastSyncTime) {
+                        console.log('🔄 Cross-device sync detected, loading all data...');
+                        
+                        // Load fresh data from all storage keys
+                        const oldUsersCount = globalData.users.length;
+                        const oldProductsCount = globalData.products.length;
+                        
+                        loadGlobalData();
                         syncLocalData();
                         refreshCurrentView();
-                        lastSyncTime = parsed.lastModified;
+                        lastSyncTime = syncInfo.lastModified;
+                        hasUpdates = true;
                         
-                        // Show notification for new users/products (only for admin)
+                        // Show notifications for changes (only for admin)
                         if (currentUser && currentUser.role === 'admin') {
-                            const newUsersCount = globalData.users.filter(u => 
-                                new Date(u.createdAt || 0) > new Date(Date.now() - 10000)
-                            ).length;
-                            
-                            const newProductsCount = globalData.products.filter(p => 
-                                new Date(p.createdAt || 0) > new Date(Date.now() - 10000)
-                            ).length;
+                            const newUsersCount = globalData.users.length - oldUsersCount;
+                            const newProductsCount = globalData.products.length - oldProductsCount;
                             
                             if (newUsersCount > 0) {
-                                showNotification(`🆕 ${newUsersCount} người dùng mới vừa đăng ký!`, 'info');
+                                showNotification(`🆕 ${newUsersCount} người dùng mới từ thiết bị khác!`, 'info');
                             }
                             if (newProductsCount > 0) {
-                                showNotification(`🆕 ${newProductsCount} sản phẩm mới được thêm!`, 'info');
+                                showNotification(`🆕 ${newProductsCount} sản phẩm mới từ thiết bị khác!`, 'info');
+                            }
+                            
+                            // Check for new recharge requests
+                            const recentRechargeRequests = globalData.rechargeRequests.filter(r => 
+                                r.status === 'pending' && new Date(r.createdAt || 0) > new Date(currentTime - 30000)
+                            );
+                            if (recentRechargeRequests.length > 0) {
+                                showNotification(`💰 ${recentRechargeRequests.length} yêu cầu nạp tiền mới!`, 'warning');
+                            }
+                        }
+                        
+                        // For regular users, check if their balance was updated
+                        if (currentUser && currentUser.role === 'user') {
+                            const updatedUser = globalData.users.find(u => u.email === currentUser.email);
+                            if (updatedUser && updatedUser.balance !== currentUser.balance) {
+                                const balanceDiff = (updatedUser.balance || 0) - (currentUser.balance || 0);
+                                if (balanceDiff > 0) {
+                                    showNotification(`💰 Tài khoản được nạp thêm ${formatPrice(balanceDiff)}!`, 'success');
+                                }
+                                currentUser.balance = updatedUser.balance;
+                                updateUserBalance();
                             }
                         }
                     }
-                } catch (error) {
-                    console.error('Error checking for updates:', error);
                 }
+                
+                if (hasUpdates) {
+                    console.log('✅ Cross-device sync completed at:', new Date().toLocaleTimeString());
+                }
+            } catch (error) {
+                console.error('❌ Error checking for updates:', error);
             }
         }
 
@@ -941,17 +1043,32 @@
             }
         }
 
-        // Start periodic sync
+        // Start aggressive periodic sync for cross-device
         function startPeriodicSync() {
             if (syncTimer) {
                 clearInterval(syncTimer);
             }
             
+            // More frequent sync for better cross-device experience
             syncTimer = setInterval(() => {
                 checkForUpdates();
             }, SYNC_INTERVAL);
             
-            console.log('🔄 Periodic sync started (every 2 seconds)');
+            // Also listen for focus events to sync immediately when user returns
+            window.addEventListener('focus', () => {
+                console.log('🔍 Window focused, checking for updates...');
+                setTimeout(checkForUpdates, 100);
+            });
+            
+            // Listen for visibility change
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    console.log('👁️ Page visible, checking for updates...');
+                    setTimeout(checkForUpdates, 100);
+                }
+            });
+            
+            console.log('🔄 Aggressive cross-device sync started (every 1 second)');
         }
 
         // Stop periodic sync
@@ -1032,19 +1149,35 @@
             }
         }
 
-        // Listen for custom data update events
-        window.addEventListener('gameshop-data-updated', function(e) {
-            if (e.detail.timestamp > lastSyncTime) {
-                setTimeout(() => checkForUpdates(), 100);
+        // Listen for multiple custom data update events
+        ['gameshop-users-updated', 'gameshop-products-updated', 'gameshop-orders-updated', 'gameshop-sync-updated'].forEach(eventName => {
+            window.addEventListener(eventName, function(e) {
+                if (e.detail.timestamp > lastSyncTime) {
+                    console.log(`📡 Received ${eventName} event, syncing...`);
+                    setTimeout(() => checkForUpdates(), 50);
+                }
+            });
+        });
+
+        // Listen for storage events (for same-origin tabs) - multiple keys
+        window.addEventListener('storage', function(e) {
+            if (Object.values(STORAGE_KEYS).includes(e.key)) {
+                console.log(`💾 Storage event detected for ${e.key}, syncing...`);
+                setTimeout(() => checkForUpdates(), 50);
             }
         });
 
-        // Listen for storage events (for same-origin tabs)
-        window.addEventListener('storage', function(e) {
-            if (e.key === GLOBAL_STORAGE_KEY) {
-                setTimeout(() => checkForUpdates(), 100);
-            }
+        // Additional cross-device sync triggers
+        window.addEventListener('online', () => {
+            console.log('🌐 Device back online, syncing...');
+            setTimeout(checkForUpdates, 200);
         });
+
+        // Periodic forced sync every 30 seconds as backup
+        setInterval(() => {
+            console.log('🔄 Forced backup sync...');
+            checkForUpdates();
+        }, 30000);
 
         // Cleanup on page unload
         window.addEventListener('beforeunload', function() {
@@ -2339,5 +2472,5 @@
         initApp();
         updateCartCount();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985c9741a6c321a6',t:'MTc1ODk5Mjc3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985ca43ea1cc03d3',t:'MTc1ODk5MzMxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
