@@ -712,24 +712,42 @@
     </div>
 
     <script>
-        // Data Storage System - Sử dụng localStorage để lưu trữ dữ liệu toàn cục
-        const STORAGE_KEYS = {
-            PRODUCTS: 'gameshop_products',
-            USERS: 'gameshop_users',
-            ORDERS: 'gameshop_orders',
-            RECHARGE_REQUESTS: 'gameshop_recharge_requests',
-            STATS: 'gameshop_stats'
+        // Global Data Storage System - Sử dụng localStorage với unique key để đồng bộ toàn cầu
+        const GLOBAL_STORAGE_KEY = 'gameshop_global_data_v2';
+        const SYNC_INTERVAL = 2000; // Đồng bộ mỗi 2 giây
+        let syncTimer = null;
+        let lastSyncTime = 0;
+
+        // Global data structure
+        let globalData = {
+            products: [],
+            users: [],
+            orders: [],
+            rechargeRequests: [],
+            stats: {
+                totalRevenue: 0,
+                todayOrders: 0,
+                lastUpdated: new Date().toISOString()
+            },
+            lastModified: Date.now()
         };
 
-        // Initialize data from localStorage or use default data
-        function initializeData() {
-            // Load products
-            const savedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
-            if (savedProducts) {
-                products.splice(0, products.length, ...JSON.parse(savedProducts));
-            } else {
-                // Default products
-                const defaultProducts = [
+        // Initialize global data system
+        function initializeGlobalData() {
+            // Load from localStorage first
+            const savedData = localStorage.getItem(GLOBAL_STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    globalData = { ...globalData, ...parsed };
+                } catch (error) {
+                    console.error('Error parsing saved data:', error);
+                }
+            }
+
+            // Initialize with default products if empty
+            if (globalData.products.length === 0) {
+                globalData.products = [
                     {
                         id: 1,
                         name: "Tài khoản Liên Quân VIP",
@@ -743,7 +761,8 @@
                         reviews: 124,
                         username: "lienquan_vip001",
                         password: "LQ2024@VIP",
-                        sold: false
+                        sold: false,
+                        createdAt: new Date().toISOString()
                     },
                     {
                         id: 2,
@@ -758,7 +777,8 @@
                         reviews: 89,
                         username: "pubg_conqueror_pro",
                         password: "PUBG2024#Pro",
-                        sold: false
+                        sold: false,
+                        createdAt: new Date().toISOString()
                     },
                     {
                         id: 3,
@@ -773,7 +793,8 @@
                         reviews: 156,
                         username: "freefire_heroic99",
                         password: "FF2024$Hero",
-                        sold: false
+                        sold: false,
+                        createdAt: new Date().toISOString()
                     },
                     {
                         id: 4,
@@ -788,126 +809,246 @@
                         reviews: 92,
                         username: "ml_mythic_legend",
                         password: "ML2024&Mythic",
-                        sold: false
+                        sold: false,
+                        createdAt: new Date().toISOString()
                     }
                 ];
-                products.push(...defaultProducts);
-                saveData(STORAGE_KEYS.PRODUCTS, products);
+                saveGlobalData();
             }
 
-            // Load users
-            const savedUsers = localStorage.getItem(STORAGE_KEYS.USERS);
-            if (savedUsers) {
-                users.splice(0, users.length, ...JSON.parse(savedUsers));
-            }
-
-            // Load orders
-            const savedOrders = localStorage.getItem(STORAGE_KEYS.ORDERS);
-            if (savedOrders) {
-                orders.splice(0, orders.length, ...JSON.parse(savedOrders));
-            }
-
-            // Load recharge requests
-            const savedRechargeRequests = localStorage.getItem(STORAGE_KEYS.RECHARGE_REQUESTS);
-            if (savedRechargeRequests) {
-                rechargeRequests.splice(0, rechargeRequests.length, ...JSON.parse(savedRechargeRequests));
-            }
-
-            // Load stats
-            const savedStats = localStorage.getItem(STORAGE_KEYS.STATS);
-            if (savedStats) {
-                const stats = JSON.parse(savedStats);
-                totalRevenue = stats.totalRevenue || 0;
-                todayOrders = stats.todayOrders || 0;
-            }
+            // Sync local arrays with global data
+            syncLocalData();
+            
+            // Start periodic sync
+            startPeriodicSync();
         }
 
-        // Save data to localStorage
-        function saveData(key, data) {
+        // Save global data to localStorage
+        function saveGlobalData() {
             try {
-                localStorage.setItem(key, JSON.stringify(data));
+                globalData.lastModified = Date.now();
+                localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(globalData));
                 
-                // Trigger storage event for other tabs/windows
-                window.dispatchEvent(new StorageEvent('storage', {
-                    key: key,
-                    newValue: JSON.stringify(data),
-                    url: window.location.href
+                // Trigger custom event for real-time sync
+                window.dispatchEvent(new CustomEvent('gameshop-data-updated', {
+                    detail: { timestamp: globalData.lastModified }
                 }));
+                
+                console.log('✅ Data saved globally at:', new Date().toLocaleTimeString());
             } catch (error) {
-                console.error('Error saving data:', error);
+                console.error('Error saving global data:', error);
                 showNotification('Lỗi lưu dữ liệu!', 'error');
             }
         }
 
-        // Save stats
-        function saveStats() {
-            const stats = {
-                totalRevenue,
-                todayOrders,
-                lastUpdated: new Date().toISOString()
-            };
-            saveData(STORAGE_KEYS.STATS, stats);
+        // Sync local arrays with global data
+        function syncLocalData() {
+            products.splice(0, products.length, ...globalData.products);
+            users.splice(0, users.length, ...globalData.users);
+            orders.splice(0, orders.length, ...globalData.orders);
+            rechargeRequests.splice(0, rechargeRequests.length, ...globalData.rechargeRequests);
+            totalRevenue = globalData.stats.totalRevenue || 0;
+            todayOrders = globalData.stats.todayOrders || 0;
+            
+            // Update current user if exists
+            if (currentUser) {
+                const updatedUser = users.find(u => u.id === currentUser.id);
+                if (updatedUser) {
+                    currentUser = updatedUser;
+                    updateUserBalance();
+                }
+            }
         }
 
-        // Listen for storage changes from other tabs/windows
-        window.addEventListener('storage', function(e) {
-            if (e.key === STORAGE_KEYS.USERS) {
-                // Update users array when changed from another tab
-                const newUsers = JSON.parse(e.newValue || '[]');
-                users.splice(0, users.length, ...newUsers);
-                
-                // Update current user if exists
-                if (currentUser) {
-                    const updatedUser = users.find(u => u.id === currentUser.id);
-                    if (updatedUser) {
-                        currentUser = updatedUser;
-                        updateUserBalance();
+        // Check for updates and sync
+        function checkForUpdates() {
+            const savedData = localStorage.getItem(GLOBAL_STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    if (parsed.lastModified > lastSyncTime) {
+                        console.log('🔄 New data detected, syncing...');
+                        globalData = { ...globalData, ...parsed };
+                        syncLocalData();
+                        refreshCurrentView();
+                        lastSyncTime = parsed.lastModified;
+                        
+                        // Show notification for new users/products (only for admin)
+                        if (currentUser && currentUser.role === 'admin') {
+                            const newUsersCount = globalData.users.filter(u => 
+                                new Date(u.createdAt || 0) > new Date(Date.now() - 10000)
+                            ).length;
+                            
+                            const newProductsCount = globalData.products.filter(p => 
+                                new Date(p.createdAt || 0) > new Date(Date.now() - 10000)
+                            ).length;
+                            
+                            if (newUsersCount > 0) {
+                                showNotification(`🆕 ${newUsersCount} người dùng mới vừa đăng ký!`, 'info');
+                            }
+                            if (newProductsCount > 0) {
+                                showNotification(`🆕 ${newProductsCount} sản phẩm mới được thêm!`, 'info');
+                            }
+                        }
                     }
+                } catch (error) {
+                    console.error('Error checking for updates:', error);
                 }
-                
-                // Refresh admin displays if on admin page
-                if (currentUser && currentUser.role === 'admin') {
-                    loadAdminUsers();
-                    updateAdminStats();
-                }
-            } else if (e.key === STORAGE_KEYS.ORDERS) {
-                const newOrders = JSON.parse(e.newValue || '[]');
-                orders.splice(0, orders.length, ...newOrders);
-                
-                if (currentUser && currentUser.role === 'admin') {
-                    loadAdminOrders();
-                    updateAdminStats();
-                }
-            } else if (e.key === STORAGE_KEYS.RECHARGE_REQUESTS) {
-                const newRequests = JSON.parse(e.newValue || '[]');
-                rechargeRequests.splice(0, rechargeRequests.length, ...newRequests);
-                
-                if (currentUser && currentUser.role === 'admin') {
-                    loadRechargeRequests();
-                }
-            } else if (e.key === STORAGE_KEYS.PRODUCTS) {
-                const newProducts = JSON.parse(e.newValue || '[]');
-                products.splice(0, products.length, ...newProducts);
-                
-                // Refresh product displays
-                if (document.getElementById('products-page').classList.contains('fade-in')) {
-                    loadProducts();
-                }
-                if (document.getElementById('home-page').classList.contains('fade-in')) {
-                    loadFeaturedProducts();
-                }
-                if (currentUser && currentUser.role === 'admin') {
-                    loadAdminProducts();
-                }
-            } else if (e.key === STORAGE_KEYS.STATS) {
-                const newStats = JSON.parse(e.newValue || '{}');
-                totalRevenue = newStats.totalRevenue || 0;
-                todayOrders = newStats.todayOrders || 0;
-                
-                if (currentUser && currentUser.role === 'admin') {
+            }
+        }
+
+        // Refresh current view based on active page
+        function refreshCurrentView() {
+            // Refresh products if on products page
+            if (!document.getElementById('products-page').classList.contains('hidden')) {
+                loadProducts();
+            }
+            
+            // Refresh home page if active
+            if (!document.getElementById('home-page').classList.contains('hidden')) {
+                loadFeaturedProducts();
+            }
+            
+            // Refresh admin panels if admin is logged in
+            if (currentUser && currentUser.role === 'admin') {
+                if (!document.getElementById('admin-page').classList.contains('hidden')) {
+                    // Check which admin tab is active
+                    const activeTab = document.querySelector('.admin-tab.active');
+                    if (activeTab) {
+                        const tabName = activeTab.textContent.trim();
+                        if (tabName.includes('sản phẩm')) {
+                            loadAdminProducts();
+                        } else if (tabName.includes('Người dùng')) {
+                            loadAdminUsers();
+                        } else if (tabName.includes('Đơn hàng')) {
+                            loadAdminOrders();
+                        } else if (tabName.includes('Nạp tiền')) {
+                            loadRechargeRequests();
+                        }
+                    }
                     updateAdminStats();
                 }
             }
+            
+            // Refresh profile if active
+            if (!document.getElementById('profile-page').classList.contains('hidden')) {
+                loadProfile();
+            }
+            
+            // Refresh orders if active
+            if (!document.getElementById('orders-page').classList.contains('hidden')) {
+                loadOrders();
+            }
+        }
+
+        // Start periodic sync
+        function startPeriodicSync() {
+            if (syncTimer) {
+                clearInterval(syncTimer);
+            }
+            
+            syncTimer = setInterval(() => {
+                checkForUpdates();
+            }, SYNC_INTERVAL);
+            
+            console.log('🔄 Periodic sync started (every 2 seconds)');
+        }
+
+        // Stop periodic sync
+        function stopPeriodicSync() {
+            if (syncTimer) {
+                clearInterval(syncTimer);
+                syncTimer = null;
+            }
+        }
+
+        // Add user to global data
+        function addUserGlobally(user) {
+            user.createdAt = new Date().toISOString();
+            user.lastLogin = new Date().toISOString();
+            globalData.users.push(user);
+            saveGlobalData();
+            console.log('👤 New user added globally:', user.name);
+        }
+
+        // Update user in global data
+        function updateUserGlobally(updatedUser) {
+            const index = globalData.users.findIndex(u => u.id === updatedUser.id);
+            if (index !== -1) {
+                globalData.users[index] = updatedUser;
+                saveGlobalData();
+            }
+        }
+
+        // Add product to global data
+        function addProductGlobally(product) {
+            product.createdAt = new Date().toISOString();
+            globalData.products.push(product);
+            saveGlobalData();
+            console.log('🎮 New product added globally:', product.name);
+        }
+
+        // Update product in global data
+        function updateProductGlobally(updatedProduct) {
+            const index = globalData.products.findIndex(p => p.id === updatedProduct.id);
+            if (index !== -1) {
+                globalData.products[index] = updatedProduct;
+                saveGlobalData();
+            }
+        }
+
+        // Delete product from global data
+        function deleteProductGlobally(productId) {
+            const index = globalData.products.findIndex(p => p.id === productId);
+            if (index !== -1) {
+                globalData.products.splice(index, 1);
+                saveGlobalData();
+                console.log('🗑️ Product deleted globally:', productId);
+            }
+        }
+
+        // Add order to global data
+        function addOrderGlobally(order) {
+            globalData.orders.push(order);
+            globalData.stats.totalRevenue += order.total;
+            globalData.stats.todayOrders += 1;
+            globalData.stats.lastUpdated = new Date().toISOString();
+            saveGlobalData();
+        }
+
+        // Add recharge request to global data
+        function addRechargeRequestGlobally(request) {
+            request.createdAt = new Date().toISOString();
+            globalData.rechargeRequests.push(request);
+            saveGlobalData();
+        }
+
+        // Update recharge request in global data
+        function updateRechargeRequestGlobally(requestId, updates) {
+            const index = globalData.rechargeRequests.findIndex(r => r.id === requestId);
+            if (index !== -1) {
+                globalData.rechargeRequests[index] = { ...globalData.rechargeRequests[index], ...updates };
+                saveGlobalData();
+            }
+        }
+
+        // Listen for custom data update events
+        window.addEventListener('gameshop-data-updated', function(e) {
+            if (e.detail.timestamp > lastSyncTime) {
+                setTimeout(() => checkForUpdates(), 100);
+            }
+        });
+
+        // Listen for storage events (for same-origin tabs)
+        window.addEventListener('storage', function(e) {
+            if (e.key === GLOBAL_STORAGE_KEY) {
+                setTimeout(() => checkForUpdates(), 100);
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            stopPeriodicSync();
         });
 
         // Initialize arrays
@@ -922,8 +1063,8 @@
 
         // Initialize app
         function initApp() {
-            // Initialize data from localStorage first
-            initializeData();
+            // Initialize global data system first
+            initializeGlobalData();
             
             if (!currentUser) {
                 showPage('login-required');
@@ -1455,26 +1596,23 @@
                     showNotification('Đăng nhập admin thành công!', 'success');
                     showPage('admin');
                 } else if (email && password) {
-                    // Find existing user or create new one
-                    let user = users.find(u => u.email === email);
+                    // Find existing user in global data or create new one
+                    let user = globalData.users.find(u => u.email === email);
                     if (!user) {
                         user = { 
                             email, 
                             role: 'user', 
                             name: 'Người dùng', 
                             id: Date.now(), 
-                            balance: 0,
-                            createdAt: new Date().toISOString(),
-                            lastLogin: new Date().toISOString()
+                            balance: 0
                         };
-                        users.push(user);
-                        // Save to localStorage immediately
-                        saveData(STORAGE_KEYS.USERS, users);
-                        showNotification('Tài khoản mới đã được tạo!', 'success');
+                        // Add to global system
+                        addUserGlobally(user);
+                        showNotification('Tài khoản mới đã được tạo và đồng bộ toàn cầu!', 'success');
                     } else {
                         // Update last login
                         user.lastLogin = new Date().toISOString();
-                        saveData(STORAGE_KEYS.USERS, users);
+                        updateUserGlobally(user);
                     }
                     currentUser = user;
                     updateUserMenu();
@@ -1503,8 +1641,8 @@
                 return;
             }
             
-            // Check if user already exists
-            if (users.find(u => u.email === email)) {
+            // Check if user already exists in global data
+            if (globalData.users.find(u => u.email === email)) {
                 showNotification('Email này đã được sử dụng!', 'error');
                 return;
             }
@@ -1515,19 +1653,16 @@
                 name, 
                 phone,
                 id: Date.now(), 
-                balance: 0,
-                createdAt: new Date().toISOString(),
-                lastLogin: new Date().toISOString()
+                balance: 0
             };
             
-            users.push(newUser);
-            // Save to localStorage immediately
-            saveData(STORAGE_KEYS.USERS, users);
+            // Add user to global system
+            addUserGlobally(newUser);
             
             currentUser = newUser;
             updateUserMenu();
             showPage('home');
-            showNotification('Đăng ký thành công!', 'success');
+            showNotification('Đăng ký thành công! Tài khoản đã được đồng bộ toàn cầu.', 'success');
         });
 
         document.getElementById('checkout-form').addEventListener('submit', function(e) {
@@ -1543,17 +1678,15 @@
             // Deduct balance
             currentUser.balance -= total;
             
-            // Update user in users array
-            const userIndex = users.findIndex(u => u.id === currentUser.id);
-            if (userIndex !== -1) {
-                users[userIndex] = currentUser;
-            }
+            // Update user in global system
+            updateUserGlobally(currentUser);
             
-            // Mark products as sold
+            // Mark products as sold in global system
             cart.forEach(cartItem => {
-                const product = products.find(p => p.id === cartItem.id);
+                const product = globalData.products.find(p => p.id === cartItem.id);
                 if (product) {
                     product.sold = true;
+                    updateProductGlobally(product);
                 }
             });
 
@@ -1569,22 +1702,14 @@
                 userName: currentUser.name
             };
             
-            orders.push(order);
+            // Add order to global system
+            addOrderGlobally(order);
+            
             cart = [];
             updateCartCount();
             updateUserBalance();
             
-            // Update admin stats
-            totalRevenue += total;
-            todayOrders += 1;
-            
-            // Save all data to localStorage
-            saveData(STORAGE_KEYS.USERS, users);
-            saveData(STORAGE_KEYS.ORDERS, orders);
-            saveData(STORAGE_KEYS.PRODUCTS, products);
-            saveStats();
-            
-            showNotification('Thanh toán thành công!', 'success');
+            showNotification('Thanh toán thành công! Đơn hàng đã được đồng bộ toàn cầu.', 'success');
             showPage('orders');
         });
 
@@ -1601,16 +1726,14 @@
                 amount: amount,
                 note: note,
                 status: 'pending',
-                date: new Date().toLocaleDateString('vi-VN'),
-                createdAt: new Date().toISOString()
+                date: new Date().toLocaleDateString('vi-VN')
             };
             
-            rechargeRequests.push(request);
-            // Save to localStorage immediately
-            saveData(STORAGE_KEYS.RECHARGE_REQUESTS, rechargeRequests);
+            // Add to global system
+            addRechargeRequestGlobally(request);
             
             closeRechargeModal();
-            showNotification('Yêu cầu nạp tiền đã được gửi!', 'success');
+            showNotification('Yêu cầu nạp tiền đã được gửi và đồng bộ toàn cầu!', 'success');
             
             // Reset form
             this.reset();
@@ -1882,7 +2005,7 @@
 
         // Quick recharge function for admin
         function quickRecharge(userId) {
-            const user = users.find(u => u.id === userId);
+            const user = globalData.users.find(u => u.id === userId);
             if (!user) return;
             
             const amount = prompt(`Nạp tiền cho ${user.name} (${user.email}):\nNhập số tiền (VNĐ):`);
@@ -1890,12 +2013,18 @@
                 const rechargeAmount = parseInt(amount);
                 user.balance = (user.balance || 0) + rechargeAmount;
                 
-                // Save to localStorage
-                saveData(STORAGE_KEYS.USERS, users);
+                // Update current user balance if it's the same user
+                if (currentUser && currentUser.email === user.email) {
+                    currentUser.balance = user.balance;
+                    updateUserBalance();
+                }
+                
+                // Update user in global system
+                updateUserGlobally(user);
                 
                 // Refresh displays
                 loadAdminUsers();
-                showNotification(`Đã nạp ${formatPrice(rechargeAmount)} cho ${user.name}`, 'success');
+                showNotification(`Đã nạp ${formatPrice(rechargeAmount)} cho ${user.name} và đồng bộ toàn cầu`, 'success');
             }
         }
 
@@ -2010,13 +2139,11 @@
         }
 
         function approveRecharge(requestId) {
-            const request = rechargeRequests.find(r => r.id === requestId);
+            const request = globalData.rechargeRequests.find(r => r.id === requestId);
             if (request) {
-                const user = users.find(u => u.email === request.userEmail);
+                const user = globalData.users.find(u => u.email === request.userEmail);
                 if (user) {
                     user.balance = (user.balance || 0) + request.amount;
-                    request.status = 'completed';
-                    request.processedAt = new Date().toISOString();
                     
                     // Update current user balance if it's the same user
                     if (currentUser && currentUser.email === user.email) {
@@ -2024,9 +2151,14 @@
                         updateUserBalance();
                     }
                     
-                    // Save to localStorage
-                    saveData(STORAGE_KEYS.USERS, users);
-                    saveData(STORAGE_KEYS.RECHARGE_REQUESTS, rechargeRequests);
+                    // Update user in global system
+                    updateUserGlobally(user);
+                    
+                    // Update recharge request in global system
+                    updateRechargeRequestGlobally(requestId, {
+                        status: 'completed',
+                        processedAt: new Date().toISOString()
+                    });
                     
                     loadRechargeRequests();
                     loadAdminUsers();
@@ -2036,17 +2168,14 @@
         }
 
         function rejectRecharge(requestId) {
-            const request = rechargeRequests.find(r => r.id === requestId);
-            if (request) {
-                request.status = 'rejected';
-                request.processedAt = new Date().toISOString();
-                
-                // Save to localStorage
-                saveData(STORAGE_KEYS.RECHARGE_REQUESTS, rechargeRequests);
-                
-                loadRechargeRequests();
-                showNotification('Đã từ chối yêu cầu nạp tiền', 'warning');
-            }
+            // Update recharge request in global system
+            updateRechargeRequestGlobally(requestId, {
+                status: 'rejected',
+                processedAt: new Date().toISOString()
+            });
+            
+            loadRechargeRequests();
+            showNotification('Đã từ chối yêu cầu nạp tiền', 'warning');
         }
 
         // Admin recharge form
@@ -2055,7 +2184,7 @@
             const email = document.getElementById('recharge-email').value;
             const amount = parseInt(document.getElementById('recharge-amount').value);
             
-            const user = users.find(u => u.email === email);
+            const user = globalData.users.find(u => u.email === email);
             if (user) {
                 user.balance = (user.balance || 0) + amount;
                 
@@ -2065,14 +2194,14 @@
                     updateUserBalance();
                 }
                 
-                // Save to localStorage
-                saveData(STORAGE_KEYS.USERS, users);
+                // Update user in global system
+                updateUserGlobally(user);
                 
                 // Refresh admin displays
                 loadAdminUsers();
                 
                 this.reset();
-                showNotification(`Đã nạp ${formatPrice(amount)} cho ${user.name}`, 'success');
+                showNotification(`Đã nạp ${formatPrice(amount)} cho ${user.name} và đồng bộ toàn cầu`, 'success');
             } else {
                 showNotification('Không tìm thấy người dùng với email này!', 'error');
             }
@@ -2128,7 +2257,7 @@
         }
 
         function editProduct(id) {
-            const product = products.find(p => p.id === id);
+            const product = globalData.products.find(p => p.id === id);
             if (product) {
                 document.getElementById('product-modal-title').textContent = 'Chỉnh sửa sản phẩm';
                 document.getElementById('product-id').value = product.id;
@@ -2172,10 +2301,11 @@
             
             if (productId) {
                 // Edit existing product
-                const index = products.findIndex(p => p.id == productId);
-                if (index !== -1) {
-                    products[index] = { ...products[index], ...productData };
-                    showNotification('Cập nhật sản phẩm thành công!', 'success');
+                const product = globalData.products.find(p => p.id == productId);
+                if (product) {
+                    const updatedProduct = { ...product, ...productData };
+                    updateProductGlobally(updatedProduct);
+                    showNotification('Cập nhật sản phẩm thành công và đồng bộ toàn cầu!', 'success');
                 }
             } else {
                 // Add new product
@@ -2183,12 +2313,9 @@
                     id: Date.now(),
                     ...productData
                 };
-                products.push(newProduct);
-                showNotification('Thêm sản phẩm mới thành công!', 'success');
+                addProductGlobally(newProduct);
+                showNotification('Thêm sản phẩm mới thành công và đồng bộ toàn cầu!', 'success');
             }
-            
-            // Save to localStorage
-            saveData(STORAGE_KEYS.PRODUCTS, products);
             
             closeProductModal();
             loadAdminProducts();
@@ -2198,18 +2325,13 @@
 
         function deleteProduct(id) {
             if (confirm('Bạn có chắc muốn xóa sản phẩm này?')) {
-                const index = products.findIndex(p => p.id === id);
-                if (index !== -1) {
-                    products.splice(index, 1);
-                    
-                    // Save to localStorage
-                    saveData(STORAGE_KEYS.PRODUCTS, products);
-                    
-                    loadAdminProducts();
-                    loadFeaturedProducts();
-                    loadProducts();
-                    showNotification(`Đã xóa sản phẩm #${id}`, 'success');
-                }
+                // Delete from global system
+                deleteProductGlobally(id);
+                
+                loadAdminProducts();
+                loadFeaturedProducts();
+                loadProducts();
+                showNotification(`Đã xóa sản phẩm #${id} và đồng bộ toàn cầu`, 'success');
             }
         }
 
@@ -2217,5 +2339,5 @@
         initApp();
         updateCartCount();
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985c830c964284a2',t:'MTc1ODk5MTk1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985c9741a6c321a6',t:'MTc1ODk5Mjc3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
