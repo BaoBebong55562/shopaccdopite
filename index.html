@@ -550,7 +550,25 @@
 
         .mobile-menu-open {
             transform: translateX(0) !important;
-            opacity: 1 !important;
+        }
+        
+        /* Mobile menu overlay */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 49;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .mobile-menu-overlay.show {
+            opacity: 1;
+            visibility: visible;
         }
 
         /* Snow Effect */
@@ -632,12 +650,23 @@
             }
 
             #mobileMenu {
-                height: calc(100vh - 80px);
+                width: 85vw;
+                max-width: 320px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #mobileMenu {
+                width: 90vw;
+                max-width: 280px;
             }
         }
     </style>
 </head>
 <body class="bg-gray-50">
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenuOverlay" class="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+
     <!-- Navigation -->
     <nav class="gradient-bg text-white shadow-2xl relative z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -690,7 +719,23 @@
         </div>
         
         <!-- Mobile Menu -->
-        <div id="mobileMenu" class="md:hidden fixed top-20 left-0 right-0 bg-black bg-opacity-95 backdrop-filter backdrop-blur-lg border-t border-white border-opacity-20 transform translate-x-full opacity-0 transition-all duration-300 ease-in-out z-40 max-h-screen overflow-y-auto">
+        <div id="mobileMenu" class="md:hidden fixed top-0 left-0 bottom-0 w-80 bg-black bg-opacity-95 backdrop-filter backdrop-blur-lg border-r border-white border-opacity-20 transform -translate-x-full transition-all duration-300 ease-in-out z-50 overflow-y-auto">
+            <!-- Menu Header -->
+            <div class="flex items-center justify-between p-4 border-b border-white border-opacity-20">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mr-3">
+                        <i class="fas fa-gamepad text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="text-lg font-bold">GameStore</span>
+                        <div class="text-xs opacity-75">Dopi Team</div>
+                    </div>
+                </div>
+                <button onclick="closeMobileMenu()" class="p-2 rounded-lg bg-white bg-opacity-10 hover:bg-opacity-20 transition-colors">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            
             <div class="px-4 py-6 space-y-4">
                 <a href="#" onclick="showSection('home'); closeMobileMenu()" class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
                     <i class="fas fa-home mr-3"></i>Trang chủ
@@ -698,10 +743,16 @@
                 <a href="#" onclick="showSection('games'); closeMobileMenu()" class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
                     <i class="fas fa-gamepad mr-3"></i>Game
                 </a>
-                <div id="mobileUserNav" class="hidden space-y-4">
-                    <div class="px-4 py-3 bg-white bg-opacity-10 rounded-lg">
-                        <i class="fas fa-wallet mr-2 text-green-300"></i>
-                        <span id="mobileUserBalance" class="font-semibold">0 VNĐ</span>
+                
+                <div id="mobileUserNav" class="hidden space-y-4 border-t border-white border-opacity-20 pt-4">
+                    <div class="px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 bg-opacity-20 rounded-lg border border-green-400 border-opacity-30">
+                        <div class="flex items-center">
+                            <i class="fas fa-wallet mr-2 text-green-300"></i>
+                            <div>
+                                <p class="text-xs text-green-200">Số dư hiện tại</p>
+                                <span id="mobileUserBalance" class="font-semibold text-white">0 VNĐ</span>
+                            </div>
+                        </div>
                     </div>
                     <a href="#" onclick="showSection('profile'); closeMobileMenu()" class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
                         <i class="fas fa-user mr-3"></i>Hồ sơ
@@ -714,13 +765,27 @@
                         <i class="fas fa-sign-out-alt mr-3"></i>Đăng xuất
                     </button>
                 </div>
-                <div id="mobileGuestNav" class="space-y-4">
+                
+                <div id="mobileGuestNav" class="space-y-4 border-t border-white border-opacity-20 pt-4">
                     <button onclick="showLogin(); closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
                         <i class="fas fa-sign-in-alt mr-3"></i>Đăng nhập
                     </button>
                     <button onclick="showRegister(); closeMobileMenu()" class="w-full btn-primary px-4 py-3 rounded-lg">
                         <i class="fas fa-user-plus mr-3"></i>Đăng ký
                     </button>
+                </div>
+                
+                <!-- Contact Section -->
+                <div class="border-t border-white border-opacity-20 pt-4">
+                    <a href="https://t.me/tomxinh917" target="_blank" rel="noopener noreferrer" class="block px-4 py-3 rounded-lg bg-blue-600 bg-opacity-20 border border-blue-400 border-opacity-30 hover:bg-opacity-30 transition-colors">
+                        <div class="flex items-center">
+                            <i class="fab fa-telegram-plane mr-3 text-blue-300"></i>
+                            <div>
+                                <p class="font-medium">Liên hệ hỗ trợ</p>
+                                <p class="text-xs opacity-75">Telegram 24/7</p>
+                            </div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -1330,18 +1395,7 @@
             document.getElementById('priceFilter').addEventListener('change', filterGames);
             document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
             
-            // Close mobile menu when clicking outside
-            document.addEventListener('click', function(e) {
-                const mobileMenu = document.getElementById('mobileMenu');
-                const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-                
-                if (mobileMenu && mobileMenuBtn && 
-                    !mobileMenu.contains(e.target) && 
-                    !mobileMenuBtn.contains(e.target) && 
-                    mobileMenu.classList.contains('mobile-menu-open')) {
-                    closeMobileMenu();
-                }
-            });
+            // Close mobile menu when clicking outside (handled by overlay click)
 
             // Close mobile menu on escape key
             document.addEventListener('keydown', function(e) {
@@ -1496,11 +1550,11 @@
 
         function openMobileMenu() {
             const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             
             mobileMenu.classList.add('mobile-menu-open');
-            mobileMenu.style.transform = 'translateX(0)';
-            mobileMenu.style.opacity = '1';
+            mobileMenuOverlay.classList.add('show');
             
             // Change hamburger to X
             mobileMenuBtn.innerHTML = '<i class="fas fa-times text-xl"></i>';
@@ -1511,11 +1565,11 @@
 
         function closeMobileMenu() {
             const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             
             mobileMenu.classList.remove('mobile-menu-open');
-            mobileMenu.style.transform = 'translateX(100%)';
-            mobileMenu.style.opacity = '0';
+            mobileMenuOverlay.classList.remove('show');
             
             // Change X back to hamburger
             mobileMenuBtn.innerHTML = '<i class="fas fa-bars text-xl"></i>';
@@ -2811,5 +2865,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9885ed3fc5d40540',t:'MTc1OTQyNjIxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98860131f2f725e5',t:'MTc1OTQyNzAzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
