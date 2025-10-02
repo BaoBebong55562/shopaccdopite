@@ -13,29 +13,68 @@
     <style>
         body {
             box-sizing: border-box;
-            background-color: #0f0f0f;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
         }
 
         .gradient-bg {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.15"/><circle cx="20" cy="80" r="0.5" fill="white" opacity="0.15"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
         }
 
         .dark-card {
-            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
-            border: 1px solid #333;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
         .game-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            background: #1a1a1a;
-            border: 1px solid #333;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
         }
 
         .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(255,255,255,0.1);
-            border-color: #555;
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .game-card:hover::before {
+            opacity: 1;
         }
 
         .modal {
@@ -46,37 +85,74 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            animation: modalFadeIn 0.3s ease-out;
         }
 
         .modal.show {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 1rem;
         }
 
         .modal-content {
-            background: #1a1a1a;
-            border: 1px solid #333;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
             color: #ffffff;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalSlideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 24px;
+            right: 24px;
             z-index: 1001;
-            padding: 12px 20px;
-            border-radius: 8px;
+            padding: 16px 24px;
+            border-radius: 16px;
             color: white;
             font-weight: 500;
             transform: translateX(400px);
-            transition: all 0.3s ease;
-            max-width: 350px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 380px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .notification.show {
@@ -84,53 +160,58 @@
         }
 
         .notification.success {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9));
         }
 
         .notification.error {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9));
         }
 
         .notification::before {
             content: '';
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             background: rgba(255,255,255,0.3);
             flex-shrink: 0;
-        }
-
-        .notification.success::before {
-            content: '✓';
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
             font-weight: bold;
+        }
+
+        .notification.success::before {
+            content: '✓';
             background: rgba(255,255,255,0.2);
         }
 
         .notification.error::before {
             content: '!';
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
             background: rgba(255,255,255,0.2);
+        }
+
+        /* Enhanced Responsive Design */
+        @media (max-width: 1024px) {
+            .max-w-7xl {
+                max-width: 100%;
+                padding: 0 1.5rem;
+            }
         }
 
         @media (max-width: 768px) {
             .gradient-bg h1 {
-                font-size: 2.5rem;
+                font-size: 2rem !important;
+                line-height: 1.2;
             }
             
             .grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
             }
             
             .lg\:grid-cols-4 {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             }
             
             .lg\:col-span-2 {
@@ -139,6 +220,50 @@
             
             .lg\:col-span-3 {
                 grid-column: span 1;
+            }
+
+            .notification {
+                top: 16px;
+                right: 16px;
+                left: 16px;
+                max-width: none;
+                transform: translateY(-100px);
+                font-size: 14px;
+                padding: 12px 16px;
+            }
+
+            .notification.show {
+                transform: translateY(0);
+            }
+
+            .modal-content {
+                margin: 1rem;
+                max-height: 90vh;
+                overflow-y: auto;
+                border-radius: 20px;
+            }
+
+            .game-card:hover {
+                transform: translateY(-4px) scale(1.01);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gradient-bg h1 {
+                font-size: 1.75rem !important;
+            }
+
+            .lg\:grid-cols-4 {
+                grid-template-columns: 1fr;
+            }
+
+            .game-card {
+                border-radius: 16px;
+            }
+
+            .modal-content {
+                border-radius: 16px;
+                margin: 0.5rem;
             }
         }
 
@@ -176,27 +301,77 @@
 
         input:focus, select:focus, textarea:focus {
             outline: none;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-            background-color: #2a2a2a;
-            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(102, 126, 234, 0.6);
+            backdrop-filter: blur(10px);
         }
 
         input, select, textarea {
-            background-color: #1a1a1a;
-            border-color: #333;
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
             color: #ffffff;
+            transition: all 0.3s ease;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         button {
-            transition: all 0.2s ease-in-out;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 12px;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
         }
 
         button:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
         button:active {
             transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         .dark-card:hover {
@@ -373,6 +548,73 @@
             visibility: visible;
         }
 
+        .mobile-menu-open {
+            transform: translateX(0) !important;
+            opacity: 1 !important;
+        }
+
+        /* Snow Effect */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            z-index: 9999;
+            user-select: none;
+            cursor: default;
+            animation-name: snowfall;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1em;
+            pointer-events: none;
+        }
+
+        @keyframes snowfall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .snowflake:nth-child(odd) {
+            animation-duration: 12s;
+        }
+
+        .snowflake:nth-child(even) {
+            animation-duration: 15s;
+        }
+
+        .snowflake:nth-child(3n) {
+            animation-duration: 18s;
+            font-size: 0.8em;
+        }
+
+        .snowflake:nth-child(4n) {
+            animation-duration: 20s;
+            font-size: 1.2em;
+        }
+
+        .snowflake:nth-child(5n) {
+            animation-duration: 14s;
+            font-size: 0.6em;
+        }
+
+        .snowflake:nth-child(6n) {
+            animation-duration: 16s;
+            font-size: 0.9em;
+        }
+
+        /* Different snow symbols for variety */
+        .snowflake.type-1::before { content: '❄'; }
+        .snowflake.type-2::before { content: '❅'; }
+        .snowflake.type-3::before { content: '❆'; }
+        .snowflake.type-4::before { content: '✻'; }
+        .snowflake.type-5::before { content: '✼'; }
+        .snowflake.type-6::before { content: '❋'; }
+
         @media (max-width: 768px) {
             .telegram-float {
                 bottom: 20px;
@@ -388,40 +630,98 @@
             .telegram-tooltip {
                 display: none;
             }
+
+            #mobileMenu {
+                height: calc(100vh - 80px);
+            }
         }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
-    <nav class="gradient-bg text-white shadow-lg">
+    <nav class="gradient-bg text-white shadow-2xl relative z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
+            <div class="flex justify-between items-center h-20">
                 <div class="flex items-center">
-                    <i class="fas fa-gamepad text-2xl mr-3"></i>
-                    <span class="text-xl font-bold">GameStore</span>
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center mr-4 backdrop-filter backdrop-blur-sm">
+                        <i class="fas fa-gamepad text-2xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-bold bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">GameStore</span>
+                        <div class="text-xs opacity-75">Dopi Team</div>
+                    </div>
                 </div>
-                <div class="hidden md:flex items-center space-x-6">
-                    <a href="#" onclick="showSection('home')" class="hover:text-blue-200 transition-colors">Trang chủ</a>
-                    <a href="#" onclick="showSection('games')" class="hover:text-blue-200 transition-colors">Game</a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#" onclick="showSection('home')" class="nav-link relative px-3 py-2 rounded-lg transition-all duration-300 hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-home mr-2"></i>Trang chủ
+                    </a>
+                    <a href="#" onclick="showSection('games')" class="nav-link relative px-3 py-2 rounded-lg transition-all duration-300 hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-gamepad mr-2"></i>Game
+                    </a>
                     <div id="userNav" class="hidden items-center space-x-4">
-                        <span id="userBalance" class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">0 VNĐ</span>
-                        <button onclick="showSection('profile')" class="hover:text-blue-200 transition-colors">
-                            <i class="fas fa-user mr-1"></i>Hồ sơ
+                        <div class="bg-white bg-opacity-15 backdrop-filter backdrop-blur-sm px-4 py-2 rounded-full border border-white border-opacity-20">
+                            <i class="fas fa-wallet mr-2 text-green-300"></i>
+                            <span id="userBalance" class="font-semibold">0 VNĐ</span>
+                        </div>
+                        <button onclick="showSection('profile')" class="nav-link relative px-3 py-2 rounded-lg transition-all duration-300 hover:bg-white hover:bg-opacity-10">
+                            <i class="fas fa-user mr-2"></i>Hồ sơ
                         </button>
-                        <button onclick="showCart()" class="relative hover:text-blue-200 transition-colors">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span id="cartCount" class="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                        <button onclick="showCart()" class="nav-link relative px-3 py-2 rounded-lg transition-all duration-300 hover:bg-white hover:bg-opacity-10">
+                            <i class="fas fa-shopping-cart mr-1"></i>
+                            <span id="cartCount" class="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg">0</span>
                         </button>
-                        <button onclick="logout()" class="hover:text-blue-200 transition-colors">Đăng xuất</button>
+                        <button onclick="logout()" class="nav-link relative px-3 py-2 rounded-lg transition-all duration-300 hover:bg-red-500 hover:bg-opacity-20 text-red-200">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Đăng xuất
+                        </button>
                     </div>
                     <div id="guestNav" class="flex items-center space-x-4">
-                        <button onclick="showLogin()" class="hover:text-blue-200 transition-colors">Đăng nhập</button>
-                        <button onclick="showRegister()" class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors">Đăng ký</button>
+                        <button onclick="showLogin()" class="nav-link relative px-4 py-2 rounded-lg transition-all duration-300 hover:bg-white hover:bg-opacity-10">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Đăng nhập
+                        </button>
+                        <button onclick="showRegister()" class="btn-primary px-6 py-2 rounded-xl shadow-lg">
+                            <i class="fas fa-user-plus mr-2"></i>Đăng ký
+                        </button>
                     </div>
                 </div>
-                <button class="md:hidden text-white">
-                    <i class="fas fa-bars"></i>
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg bg-white bg-opacity-10 backdrop-filter backdrop-blur-sm">
+                    <i class="fas fa-bars text-xl"></i>
                 </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="md:hidden fixed top-20 left-0 right-0 bg-black bg-opacity-95 backdrop-filter backdrop-blur-lg border-t border-white border-opacity-20 transform translate-x-full opacity-0 transition-all duration-300 ease-in-out z-40 max-h-screen overflow-y-auto">
+            <div class="px-4 py-6 space-y-4">
+                <a href="#" onclick="showSection('home'); closeMobileMenu()" class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
+                    <i class="fas fa-home mr-3"></i>Trang chủ
+                </a>
+                <a href="#" onclick="showSection('games'); closeMobileMenu()" class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
+                    <i class="fas fa-gamepad mr-3"></i>Game
+                </a>
+                <div id="mobileUserNav" class="hidden space-y-4">
+                    <div class="px-4 py-3 bg-white bg-opacity-10 rounded-lg">
+                        <i class="fas fa-wallet mr-2 text-green-300"></i>
+                        <span id="mobileUserBalance" class="font-semibold">0 VNĐ</span>
+                    </div>
+                    <a href="#" onclick="showSection('profile'); closeMobileMenu()" class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
+                        <i class="fas fa-user mr-3"></i>Hồ sơ
+                    </a>
+                    <a href="#" onclick="showCart(); closeMobileMenu()" class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors relative">
+                        <i class="fas fa-shopping-cart mr-3"></i>Giỏ hàng
+                        <span id="mobileCartCount" class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-red-500 text-xs rounded-full w-6 h-6 flex items-center justify-center">0</span>
+                    </a>
+                    <button onclick="logout(); closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-red-500 hover:bg-opacity-20 transition-colors text-red-200">
+                        <i class="fas fa-sign-out-alt mr-3"></i>Đăng xuất
+                    </button>
+                </div>
+                <div id="mobileGuestNav" class="space-y-4">
+                    <button onclick="showLogin(); closeMobileMenu()" class="w-full text-left px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
+                        <i class="fas fa-sign-in-alt mr-3"></i>Đăng nhập
+                    </button>
+                    <button onclick="showRegister(); closeMobileMenu()" class="w-full btn-primary px-4 py-3 rounded-lg">
+                        <i class="fas fa-user-plus mr-3"></i>Đăng ký
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -774,9 +1074,9 @@
                             <div class="flex justify-between items-center">
                                 <div>
                                     <p class="text-xs text-blue-200 mb-1">Số tài khoản</p>
-                                    <p class="font-mono text-lg font-bold text-white" id="bankAccount">34567159999</p>
+                                    <p class="font-mono text-lg font-bold text-white" id="bankAccount">345678159999</p>
                                 </div>
-                                <button onclick="copyToClipboard('34567159999')" class="copy-btn px-3 py-2 rounded-lg text-xs">
+                                <button onclick="copyToClipboard('345678159999')" class="copy-btn px-3 py-2 rounded-lg text-xs">
                                     <i class="fas fa-copy mr-1"></i>Copy
                                 </button>
                             </div>
@@ -989,6 +1289,7 @@
             initializeApp();
             setupEventListeners();
             loadSampleGames();
+            initSnowEffect();
         });
 
         function initializeApp() {
@@ -1027,6 +1328,30 @@
             document.getElementById('searchInput').addEventListener('input', filterGames);
             document.getElementById('categoryFilter').addEventListener('change', filterGames);
             document.getElementById('priceFilter').addEventListener('change', filterGames);
+            document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                const mobileMenu = document.getElementById('mobileMenu');
+                const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+                
+                if (mobileMenu && mobileMenuBtn && 
+                    !mobileMenu.contains(e.target) && 
+                    !mobileMenuBtn.contains(e.target) && 
+                    mobileMenu.classList.contains('mobile-menu-open')) {
+                    closeMobileMenu();
+                }
+            });
+
+            // Close mobile menu on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const mobileMenu = document.getElementById('mobileMenu');
+                    if (mobileMenu && mobileMenu.classList.contains('mobile-menu-open')) {
+                        closeMobileMenu();
+                    }
+                }
+            });
         }
 
         // Authentication functions
@@ -1141,11 +1466,62 @@
             document.getElementById('userNav').classList.remove('hidden');
             document.getElementById('userNav').classList.add('flex');
             document.getElementById('guestNav').classList.add('hidden');
+            
+            // Mobile nav
+            document.getElementById('mobileUserNav').classList.remove('hidden');
+            document.getElementById('mobileGuestNav').classList.add('hidden');
         }
 
         function showGuestNav() {
             document.getElementById('userNav').classList.add('hidden');
             document.getElementById('guestNav').classList.remove('hidden');
+            
+            // Mobile nav
+            document.getElementById('mobileUserNav').classList.add('hidden');
+            document.getElementById('mobileGuestNav').classList.remove('hidden');
+        }
+
+        // Mobile menu functions
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const isOpen = mobileMenu.classList.contains('mobile-menu-open');
+            
+            if (isOpen) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        }
+
+        function openMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            
+            mobileMenu.classList.add('mobile-menu-open');
+            mobileMenu.style.transform = 'translateX(0)';
+            mobileMenu.style.opacity = '1';
+            
+            // Change hamburger to X
+            mobileMenuBtn.innerHTML = '<i class="fas fa-times text-xl"></i>';
+            
+            // Prevent body scroll
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            
+            mobileMenu.classList.remove('mobile-menu-open');
+            mobileMenu.style.transform = 'translateX(100%)';
+            mobileMenu.style.opacity = '0';
+            
+            // Change X back to hamburger
+            mobileMenuBtn.innerHTML = '<i class="fas fa-bars text-xl"></i>';
+            
+            // Restore body scroll
+            document.body.style.overflow = '';
         }
 
         async function loadUserData() {
@@ -1205,10 +1581,12 @@
             const userBalanceEl = document.getElementById('userBalance');
             const profileBalanceEl = document.getElementById('profileBalance');
             const modalBalanceEl = document.getElementById('currentBalanceInModal');
+            const mobileBalanceEl = document.getElementById('mobileUserBalance');
             
             if (userBalanceEl) userBalanceEl.textContent = formattedBalance;
             if (profileBalanceEl) profileBalanceEl.textContent = formattedBalance;
             if (modalBalanceEl) modalBalanceEl.textContent = formattedBalance;
+            if (mobileBalanceEl) mobileBalanceEl.textContent = formattedBalance;
             
             console.log('Balance display updated:', formattedBalance);
         }
@@ -1841,7 +2219,9 @@
         }
 
         function updateCartDisplay() {
-            document.getElementById('cartCount').textContent = cart.length;
+            const count = cart.length;
+            document.getElementById('cartCount').textContent = count;
+            document.getElementById('mobileCartCount').textContent = count;
         }
 
         function showCart() {
@@ -2379,6 +2759,51 @@
             }
         }, 10000);
 
+        // Snow Effect Functions
+        function initSnowEffect() {
+            createSnowflakes();
+            
+            // Create new snowflakes periodically
+            setInterval(createSnowflake, 800);
+        }
+
+        function createSnowflakes() {
+            // Create initial batch of snowflakes
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => createSnowflake(), i * 200);
+            }
+        }
+
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            const snowTypes = ['type-1', 'type-2', 'type-3', 'type-4', 'type-5', 'type-6'];
+            const randomType = snowTypes[Math.floor(Math.random() * snowTypes.length)];
+            
+            snowflake.className = `snowflake ${randomType}`;
+            
+            // Random horizontal position
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            
+            // Random animation delay for more natural effect
+            snowflake.style.animationDelay = Math.random() * 2 + 's';
+            
+            // Random horizontal drift
+            const drift = (Math.random() - 0.5) * 100;
+            snowflake.style.setProperty('--drift', drift + 'px');
+            
+            // Add subtle horizontal movement
+            snowflake.style.animation = `snowfall ${12 + Math.random() * 8}s linear infinite`;
+            
+            document.body.appendChild(snowflake);
+            
+            // Remove snowflake after animation completes
+            setTimeout(() => {
+                if (snowflake.parentNode) {
+                    snowflake.parentNode.removeChild(snowflake);
+                }
+            }, 25000);
+        }
+
         // Close modals when clicking outside
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal')) {
@@ -2386,5 +2811,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9885ce63662f0540',t:'MTc1OTQyNDk1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9885ed3fc5d40540',t:'MTc1OTQyNjIxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
