@@ -687,6 +687,10 @@
                     <a href="#" onclick="showSection('games')" class="nav-link relative px-3 py-2 rounded-lg transition-all duration-300 hover:bg-white hover:bg-opacity-10">
                         <i class="fas fa-gamepad mr-2"></i>Game
                     </a>
+                    <a href="#" onclick="showSection('minigames')" class="nav-link relative px-3 py-2 rounded-lg transition-all duration-300 hover:bg-white hover:bg-opacity-10">
+                        <i class="fas fa-dice mr-2"></i>Mini Game
+                    </a>
+
                     <div id="userNav" class="hidden items-center space-x-4">
                         <div class="bg-white bg-opacity-15 backdrop-filter backdrop-blur-sm px-4 py-2 rounded-full border border-white border-opacity-20">
                             <i class="fas fa-wallet mr-2 text-green-300"></i>
@@ -743,6 +747,10 @@
                 <a href="#" onclick="showSection('games'); closeMobileMenu()" class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
                     <i class="fas fa-gamepad mr-3"></i>Game
                 </a>
+                <a href="#" onclick="showSection('minigames'); closeMobileMenu()" class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
+                    <i class="fas fa-dice mr-3"></i>Mini Game
+                </a>
+
                 
                 <div id="mobileUserNav" class="hidden space-y-4 border-t border-white border-opacity-20 pt-4">
                     <div class="px-4 py-3 bg-gradient-to-r from-green-600 to-blue-600 bg-opacity-20 rounded-lg border border-green-400 border-opacity-30">
@@ -890,6 +898,160 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8" id="allGames">
                     <!-- Games will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+
+
+        <!-- Mini Games Section -->
+        <section id="minigamesSection" class="section hidden">
+            <div class="max-w-7xl mx-auto px-4 py-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold mb-4 text-gray-800">🌱 Game Trồng Cây</h2>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto">Nuôi dưỡng cây của bạn và nhận thưởng! Càng chăm sóc nhiều, phần thưởng càng lớn!</p>
+                </div>
+
+                <!-- Tree Game Card -->
+                <div class="max-w-4xl mx-auto">
+                    <div class="dark-card p-8 text-center">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Tree Display -->
+                            <div class="text-center">
+                                <div class="mb-6">
+                                    <div id="treeDisplay" class="text-8xl mb-4">🌱</div>
+                                    <h3 class="text-2xl font-bold text-white mb-2">Cây của bạn</h3>
+                                    <div class="bg-gray-800 rounded-lg p-4 mb-4">
+                                        <div class="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <p class="text-gray-400">Cấp độ</p>
+                                                <p class="text-2xl font-bold text-green-400" id="treeLevel">1</p>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-400">Tổng EXP</p>
+                                                <p class="text-xl font-bold text-blue-400" id="totalExp">0</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- EXP Progress Bar -->
+                                    <div class="mb-4">
+                                        <div class="flex justify-between text-sm text-gray-300 mb-1">
+                                            <span>EXP tiến độ</span>
+                                            <span id="expProgress">0 / 47,000</span>
+                                        </div>
+                                        <div class="w-full bg-gray-700 rounded-full h-3">
+                                            <div id="expBar" class="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Level Up Button -->
+                                    <div id="levelUpSection" class="hidden mb-4">
+                                        <div class="bg-yellow-600 bg-opacity-20 border border-yellow-500 rounded-lg p-4 mb-3">
+                                            <p class="text-yellow-200 font-bold">🎉 Đủ EXP để lên cấp!</p>
+                                            <p class="text-sm text-yellow-300">Nhấn nút để thử vận may nâng cấp</p>
+                                        </div>
+                                        <button onclick="attemptLevelUp()" class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-lg font-bold hover:from-yellow-600 hover:to-orange-600 transition-all">
+                                            <i class="fas fa-arrow-up mr-2"></i>Nâng Cấp
+                                        </button>
+                                    </div>
+
+                                    <!-- Rewards Info -->
+                                    <div class="bg-purple-600 bg-opacity-20 border border-purple-500 rounded-lg p-4">
+                                        <p class="text-purple-200 font-bold mb-2">🎁 Phần thưởng tiếp theo</p>
+                                        <p class="text-sm text-purple-300" id="nextReward">Cấp 5: 500,000 VNĐ</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Care Actions -->
+                            <div>
+                                <h3 class="text-xl font-bold text-white mb-6">💧 Chăm sóc cây</h3>
+                                
+                                <!-- Care Options -->
+                                <div class="space-y-4 mb-6">
+                                    <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <div>
+                                                <p class="text-white font-semibold">Tưới nước cơ bản</p>
+                                                <p class="text-sm text-gray-400">+100 EXP</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-green-400 font-bold">1,000 VNĐ</p>
+                                            </div>
+                                        </div>
+                                        <button onclick="careForTree(100, 1000)" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                            <i class="fas fa-tint mr-2"></i>Tưới nước
+                                        </button>
+                                    </div>
+
+                                    <div class="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <div>
+                                                <p class="text-white font-semibold">Bón phân đặc biệt</p>
+                                                <p class="text-sm text-gray-400">+1,000 EXP</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-green-400 font-bold">10,000 VNĐ</p>
+                                            </div>
+                                        </div>
+                                        <button onclick="careForTree(1000, 10000)" class="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors">
+                                            <i class="fas fa-seedling mr-2"></i>Bón phân
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Daily Missions -->
+                                <div class="bg-purple-600 bg-opacity-20 border border-purple-500 rounded-lg p-4 mb-4">
+                                    <h4 class="text-purple-200 font-bold mb-3">🎯 Nhiệm vụ hàng ngày</h4>
+                                    <div id="dailyMissions" class="space-y-2">
+                                        <!-- Missions will be loaded here -->
+                                    </div>
+                                </div>
+
+                                <!-- Free Care Actions -->
+                                <div class="bg-green-600 bg-opacity-20 border border-green-500 rounded-lg p-4 mb-4">
+                                    <h4 class="text-green-200 font-bold mb-3">🆓 Lượt chăm sóc miễn phí</h4>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="text-center">
+                                            <div class="bg-blue-500 bg-opacity-30 rounded-lg p-3">
+                                                <i class="fas fa-tint text-blue-300 text-xl mb-1"></i>
+                                                <p class="text-blue-200 text-sm">Lượt tưới nước</p>
+                                                <p class="text-white font-bold text-lg" id="freeWaterCount">0</p>
+                                                <button onclick="useFreeWater()" id="freeWaterBtn" class="mt-2 bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                    Tưới miễn phí
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="text-center">
+                                            <div class="bg-green-500 bg-opacity-30 rounded-lg p-3">
+                                                <i class="fas fa-seedling text-green-300 text-xl mb-1"></i>
+                                                <p class="text-green-200 text-sm">Lượt bón phân</p>
+                                                <p class="text-white font-bold text-lg" id="freeFertilizerCount">0</p>
+                                                <button onclick="useFreeFertilizer()" id="freeFertilizerBtn" class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                                    Bón miễn phí
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Simple Guide -->
+                                <div class="bg-amber-600 bg-opacity-20 border border-amber-500 rounded-lg p-4">
+                                    <h4 class="text-amber-200 font-bold mb-2">🌱 Hướng dẫn</h4>
+                                    <p class="text-sm text-amber-200">Hãy chăm chỉ tưới nước để được nhận quà! Hoàn thành nhiệm vụ hàng ngày để nhận thêm lượt chăm sóc miễn phí.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Achievement History -->
+                    <div class="mt-8 dark-card p-6">
+                        <h3 class="text-xl font-bold text-white mb-4">🏆 Lịch sử thành tích</h3>
+                        <div id="achievementHistory" class="space-y-2 max-h-40 overflow-y-auto">
+                            <p class="text-gray-400 text-center py-4">Chưa có thành tích nào</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -1304,6 +1466,18 @@
         </div>
     </div>
 
+    <!-- Game Modal -->
+    <div id="gameModal" class="modal">
+        <div class="modal-content rounded-lg p-6 max-w-4xl w-full mx-4 relative shadow-2xl max-h-screen overflow-y-auto">
+            <button onclick="closeGame()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-300 text-xl z-10">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="gameContainer" class="text-center">
+                <!-- Game content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Notification -->
     <div id="notification" class="notification">
         <span id="notificationText"></span>
@@ -1341,6 +1515,7 @@
         let transactionListener = null;
         let topupListener = null;
         let currentTransactionTab = 'topup';
+        let userVouchers = [];
 
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
@@ -1370,6 +1545,8 @@
                     currentUser = user;
                     showUserNav();
                     loadUserData();
+                    loadUserVouchers();
+                    loadTreeGameData();
                 } else {
                     currentUser = null;
                     showGuestNav();
@@ -2192,6 +2369,7 @@
                             ${formattedOriginalPrice ? `<div class="text-sm text-gray-500 line-through">${formattedOriginalPrice} VNĐ</div>` : ''}
                             <div class="text-2xl font-bold text-blue-600">${formattedPrice} VNĐ</div>
                         </div>
+                        
                         <div class="flex gap-2">
                             <button onclick="addToCart('${game.id}')" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                                 <i class="fas fa-cart-plus mr-1"></i>Thêm
@@ -2324,7 +2502,19 @@
             try {
                 const userDoc = await db.collection('users').doc(currentUser.uid).get();
                 const userData = userDoc.data();
-                const total = cart.reduce((sum, game) => sum + game.price, 0);
+                
+                // Calculate total with applied vouchers
+                let total = 0;
+                const usedVouchers = [];
+                
+                cart.forEach(game => {
+                    if (game.appliedVoucher) {
+                        total += game.discountedPrice || game.price;
+                        usedVouchers.push(game.appliedVoucher);
+                    } else {
+                        total += game.price;
+                    }
+                });
                 
                 if (userData.balance < total) {
                     showNotification('Số dư không đủ! Vui lòng nạp thêm tiền.', 'error');
@@ -2357,6 +2547,9 @@
                 
                 // Add to local storage immediately
                 addTransaction(transaction);
+
+                // Check purchase mission
+                checkPurchaseMission();
                 
                 // Try to save to Firestore (but don't block if it fails)
                 try {
@@ -2387,6 +2580,19 @@
                     console.log('Transaction saved to Firestore:', orderRef.id);
                 } catch (firestoreError) {
                     console.error('Firestore save failed, but transaction is saved locally:', firestoreError);
+                }
+                
+                // Mark used vouchers as used
+                usedVouchers.forEach(voucher => {
+                    const userVoucher = userVouchers.find(v => v.id === voucher.id);
+                    if (userVoucher) {
+                        userVoucher.used = true;
+                    }
+                });
+                
+                if (usedVouchers.length > 0) {
+                    saveUserVouchers();
+                    updateVouchersDisplay();
                 }
                 
                 cart = [];
@@ -2548,6 +2754,9 @@
                                         
                                         console.log('Topup processed successfully');
                                         showNotification('Nạp tiền thành công! Số dư đã được cập nhật.', 'success');
+
+                                        // Check topup mission
+                                        checkTopupMission(requestData.amount);
                                         
                                         // Update display if on topup tab
                                         if (currentTransactionTab === 'topup') {
@@ -2858,6 +3067,520 @@
             }, 25000);
         }
 
+
+
+
+
+        // Tree Growing Game Functions
+        let treeGame = {
+            level: 1,
+            currentExp: 0,
+            totalExp: 0,
+            achievements: [],
+            freeWater: 0,
+            freeFertilizer: 0,
+            dailyMissions: {
+                lastReset: null,
+                loginReward: false,
+                purchaseCount: 0,
+                topupAmount: 0
+            }
+        };
+
+        // Load tree game data from localStorage
+        function loadTreeGameData() {
+            if (!currentUser) return;
+            
+            const storageKey = `treeGame_${currentUser.uid}`;
+            const stored = localStorage.getItem(storageKey);
+            
+            if (stored) {
+                try {
+                    const loadedData = JSON.parse(stored);
+                    treeGame = {
+                        level: loadedData.level || 1,
+                        currentExp: loadedData.currentExp || 0,
+                        totalExp: loadedData.totalExp || 0,
+                        achievements: loadedData.achievements || [],
+                        freeWater: loadedData.freeWater || 0,
+                        freeFertilizer: loadedData.freeFertilizer || 0,
+                        dailyMissions: loadedData.dailyMissions || {
+                            lastReset: null,
+                            loginReward: false,
+                            purchaseCount: 0,
+                            topupAmount: 0
+                        }
+                    };
+                    console.log('Loaded tree game data:', treeGame);
+                } catch (error) {
+                    console.error('Error parsing stored tree game data:', error);
+                    resetTreeGameData();
+                }
+            } else {
+                resetTreeGameData();
+            }
+            
+            checkDailyReset();
+            updateTreeDisplay();
+            updateDailyMissions();
+        }
+
+        function resetTreeGameData() {
+            treeGame = {
+                level: 1,
+                currentExp: 0,
+                totalExp: 0,
+                achievements: [],
+                freeWater: 0,
+                freeFertilizer: 0,
+                dailyMissions: {
+                    lastReset: null,
+                    loginReward: false,
+                    purchaseCount: 0,
+                    topupAmount: 0
+                }
+            };
+        }
+
+        // Save tree game data to localStorage
+        function saveTreeGameData() {
+            if (!currentUser) return;
+            
+            const storageKey = `treeGame_${currentUser.uid}`;
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(treeGame));
+                console.log('Saved tree game data');
+            } catch (error) {
+                console.error('Error saving tree game data:', error);
+            }
+        }
+
+        // Calculate EXP needed for next level
+        function getExpNeededForLevel(level) {
+            return 47000 * Math.pow(2, level - 1);
+        }
+
+        // Get tree emoji based on level
+        function getTreeEmoji(level) {
+            if (level >= 80) return '🌳'; // Giant tree
+            if (level >= 60) return '🌲'; // Big tree
+            if (level >= 40) return '🌴'; // Palm tree
+            if (level >= 20) return '🌿'; // Bush
+            if (level >= 10) return '🪴'; // Potted plant
+            if (level >= 5) return '🌱'; // Seedling
+            return '🌱'; // Seedling
+        }
+
+        // Update tree display
+        function updateTreeDisplay() {
+            const treeDisplay = document.getElementById('treeDisplay');
+            const treeLevelEl = document.getElementById('treeLevel');
+            const totalExpEl = document.getElementById('totalExp');
+            const expProgressEl = document.getElementById('expProgress');
+            const expBarEl = document.getElementById('expBar');
+            const levelUpSection = document.getElementById('levelUpSection');
+            const nextRewardEl = document.getElementById('nextReward');
+            const freeWaterCountEl = document.getElementById('freeWaterCount');
+            const freeFertilizerCountEl = document.getElementById('freeFertilizerCount');
+            const freeWaterBtn = document.getElementById('freeWaterBtn');
+            const freeFertilizerBtn = document.getElementById('freeFertilizerBtn');
+
+            if (!treeDisplay) return; // Elements not loaded yet
+
+            // Update tree emoji
+            treeDisplay.textContent = getTreeEmoji(treeGame.level);
+            
+            // Update level and total exp
+            treeLevelEl.textContent = treeGame.level;
+            totalExpEl.textContent = new Intl.NumberFormat('vi-VN').format(treeGame.totalExp);
+
+            // Calculate progress for current level
+            const expNeeded = getExpNeededForLevel(treeGame.level);
+            const progressPercent = Math.min((treeGame.currentExp / expNeeded) * 100, 100);
+            
+            expProgressEl.textContent = `${new Intl.NumberFormat('vi-VN').format(treeGame.currentExp)} / ${new Intl.NumberFormat('vi-VN').format(expNeeded)}`;
+            expBarEl.style.width = progressPercent + '%';
+
+            // Show/hide level up button
+            if (treeGame.currentExp >= expNeeded) {
+                levelUpSection.classList.remove('hidden');
+            } else {
+                levelUpSection.classList.add('hidden');
+            }
+
+            // Update next reward info
+            const nextRewardLevel = Math.ceil(treeGame.level / 5) * 5;
+            const rewardMultiplier = Math.floor(nextRewardLevel / 5);
+            const rewardAmount = 500000 * Math.pow(2, rewardMultiplier - 1);
+            nextRewardEl.textContent = `Cấp ${nextRewardLevel}: ${new Intl.NumberFormat('vi-VN').format(rewardAmount)} VNĐ`;
+
+            // Update free care counts
+            if (freeWaterCountEl) freeWaterCountEl.textContent = treeGame.freeWater;
+            if (freeFertilizerCountEl) freeFertilizerCountEl.textContent = treeGame.freeFertilizer;
+
+            // Update button states
+            if (freeWaterBtn) {
+                freeWaterBtn.disabled = treeGame.freeWater <= 0;
+            }
+            if (freeFertilizerBtn) {
+                freeFertilizerBtn.disabled = treeGame.freeFertilizer <= 0;
+            }
+        }
+
+        // Care for tree (water/fertilize)
+        async function careForTree(expGain, cost) {
+            if (!currentUser) {
+                showNotification('Vui lòng đăng nhập để chơi game!', 'error');
+                showLogin();
+                return;
+            }
+
+            try {
+                // Check user balance
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                const userData = userDoc.data();
+                const currentBalance = userData.balance || 0;
+
+                if (currentBalance < cost) {
+                    showNotification(`Số dư không đủ! Cần ${new Intl.NumberFormat('vi-VN').format(cost)} VNĐ.`, 'error');
+                    return;
+                }
+
+                // Deduct cost
+                await db.collection('users').doc(currentUser.uid).update({
+                    balance: currentBalance - cost
+                });
+
+                // Add EXP
+                treeGame.currentExp += expGain;
+                treeGame.totalExp += expGain;
+
+                // Save data
+                saveTreeGameData();
+                updateTreeDisplay();
+
+                // Show notification
+                const actionName = cost === 1000 ? 'tưới nước' : 'bón phân';
+                showNotification(`Đã ${actionName}! +${expGain} EXP`, 'success');
+
+                // Add achievement
+                addAchievement(`${actionName} cho cây (+${expGain} EXP)`);
+
+            } catch (error) {
+                console.error('Error caring for tree:', error);
+                showNotification('Lỗi chăm sóc cây: ' + error.message, 'error');
+            }
+        }
+
+        // Attempt to level up
+        async function attemptLevelUp() {
+            const expNeeded = getExpNeededForLevel(treeGame.level);
+            
+            if (treeGame.currentExp < expNeeded) {
+                showNotification('Chưa đủ EXP để nâng cấp!', 'error');
+                return;
+            }
+
+            // 50% chance to succeed
+            const success = Math.random() < 0.5;
+            
+            if (success) {
+                // Level up success
+                treeGame.level++;
+                treeGame.currentExp = 0; // Reset current exp for new level
+                
+                // Check for reward
+                if (treeGame.level % 5 === 0) {
+                    await giveReward(treeGame.level);
+                }
+                
+                showNotification(`🎉 Nâng cấp thành công! Cây đã lên cấp ${treeGame.level}!`, 'success');
+                addAchievement(`Nâng cấp thành công lên cấp ${treeGame.level}! 🎉`);
+                
+            } else {
+                // Level up failed
+                if (treeGame.level > 1) {
+                    treeGame.level--;
+                    treeGame.currentExp = 0; // Reset exp
+                    showNotification(`😢 Nâng cấp thất bại! Cây xuống cấp ${treeGame.level}`, 'error');
+                    addAchievement(`Nâng cấp thất bại, xuống cấp ${treeGame.level} 😢`);
+                } else {
+                    treeGame.currentExp = 0; // Just reset exp if already level 1
+                    showNotification('😢 Nâng cấp thất bại! EXP đã bị reset', 'error');
+                    addAchievement('Nâng cấp thất bại, EXP bị reset 😢');
+                }
+            }
+            
+            saveTreeGameData();
+            updateTreeDisplay();
+        }
+
+        // Give reward for reaching milestone levels
+        async function giveReward(level) {
+            try {
+                const rewardTier = Math.floor(level / 5);
+                const rewardAmount = 500000 * Math.pow(2, rewardTier - 1);
+                
+                // Add money to user account
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                const userData = userDoc.data();
+                const currentBalance = userData.balance || 0;
+                
+                await db.collection('users').doc(currentUser.uid).update({
+                    balance: currentBalance + rewardAmount
+                });
+                
+                // Create transaction record
+                const transaction = {
+                    id: 'tree_reward_' + Date.now(),
+                    userId: currentUser.uid,
+                    type: 'tree_reward',
+                    amount: rewardAmount,
+                    status: 'completed',
+                    description: `Phần thưởng cấp ${level} - Game trồng cây`,
+                    createdAt: new Date()
+                };
+                
+                addTransaction(transaction);
+                
+                showNotification(`🎁 Nhận thưởng ${new Intl.NumberFormat('vi-VN').format(rewardAmount)} VNĐ cho cấp ${level}!`, 'success');
+                addAchievement(`Nhận thưởng ${new Intl.NumberFormat('vi-VN').format(rewardAmount)} VNĐ (Cấp ${level}) 🎁`);
+                
+            } catch (error) {
+                console.error('Error giving reward:', error);
+                showNotification('Lỗi trao thưởng: ' + error.message, 'error');
+            }
+        }
+
+        // Add achievement to history
+        function addAchievement(text) {
+            const achievement = {
+                text: text,
+                timestamp: new Date()
+            };
+            
+            treeGame.achievements.unshift(achievement); // Add to beginning
+            
+            // Keep only last 20 achievements
+            if (treeGame.achievements.length > 20) {
+                treeGame.achievements = treeGame.achievements.slice(0, 20);
+            }
+            
+            updateAchievementDisplay();
+            saveTreeGameData();
+        }
+
+        // Update achievement display
+        function updateAchievementDisplay() {
+            const achievementHistory = document.getElementById('achievementHistory');
+            if (!achievementHistory) return;
+            
+            if (treeGame.achievements.length === 0) {
+                achievementHistory.innerHTML = '<p class="text-gray-400 text-center py-4">Chưa có thành tích nào</p>';
+                return;
+            }
+            
+            achievementHistory.innerHTML = treeGame.achievements.map(achievement => {
+                const timeStr = new Date(achievement.timestamp).toLocaleString('vi-VN');
+                return `
+                    <div class="bg-gray-800 border border-gray-600 rounded-lg p-3 flex justify-between items-center">
+                        <span class="text-white text-sm">${achievement.text}</span>
+                        <span class="text-gray-400 text-xs">${timeStr}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Voucher system functions
+        function saveUserVouchers() {
+            if (!currentUser) return;
+            
+            const storageKey = `vouchers_${currentUser.uid}`;
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(userVouchers));
+                console.log('Saved vouchers to storage');
+            } catch (error) {
+                console.error('Error saving vouchers to storage:', error);
+            }
+        }
+
+        function loadUserVouchers() {
+            if (!currentUser) return;
+            
+            const storageKey = `vouchers_${currentUser.uid}`;
+            const stored = localStorage.getItem(storageKey);
+            
+            if (stored) {
+                try {
+                    userVouchers = JSON.parse(stored);
+                    console.log('Loaded vouchers from storage:', userVouchers);
+                } catch (error) {
+                    console.error('Error parsing stored vouchers:', error);
+                    userVouchers = [];
+                }
+            } else {
+                userVouchers = [];
+            }
+        }
+
+        // Daily missions functions
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            const lastReset = treeGame.dailyMissions.lastReset;
+            
+            if (lastReset !== today) {
+                // Reset daily missions
+                treeGame.dailyMissions = {
+                    lastReset: today,
+                    loginReward: false,
+                    purchaseCount: 0,
+                    topupAmount: 0
+                };
+                
+                console.log('Daily missions reset for:', today);
+                saveTreeGameData();
+            }
+        }
+
+        function updateDailyMissions() {
+            const missionsContainer = document.getElementById('dailyMissions');
+            if (!missionsContainer) return;
+
+            const missions = [
+                {
+                    id: 'login',
+                    title: '🎯 Đăng nhập hàng ngày',
+                    description: 'Nhận 3 lượt bón phân + 1 lượt tưới nước',
+                    completed: treeGame.dailyMissions.loginReward,
+                    reward: '3 🌱 + 1 💧'
+                },
+                {
+                    id: 'purchase',
+                    title: '🛒 Mua 3+ sản phẩm trong ngày',
+                    description: `Đã mua: ${treeGame.dailyMissions.purchaseCount}/3`,
+                    completed: treeGame.dailyMissions.purchaseCount >= 3,
+                    reward: '6 💧'
+                },
+                {
+                    id: 'topup',
+                    title: '💰 Nạp tiền trên 100K trong ngày',
+                    description: `Đã nạp: ${new Intl.NumberFormat('vi-VN').format(treeGame.dailyMissions.topupAmount)} VNĐ`,
+                    completed: treeGame.dailyMissions.topupAmount >= 100000,
+                    reward: '10 💧'
+                }
+            ];
+
+            missionsContainer.innerHTML = missions.map(mission => `
+                <div class="bg-gray-800 border border-gray-600 rounded-lg p-3 flex justify-between items-center">
+                    <div class="flex-1">
+                        <h5 class="text-white font-semibold text-sm">${mission.title}</h5>
+                        <p class="text-gray-400 text-xs">${mission.description}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-purple-300 text-xs font-bold">${mission.reward}</p>
+                        ${mission.completed ? 
+                            '<span class="text-green-400 text-xs">✅ Hoàn thành</span>' : 
+                            mission.id === 'login' && !mission.completed ? 
+                                `<button onclick="claimLoginReward()" class="bg-purple-600 text-white px-2 py-1 rounded text-xs hover:bg-purple-700 transition-colors">Nhận</button>` :
+                                '<span class="text-gray-500 text-xs">Chưa hoàn thành</span>'
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function claimLoginReward() {
+            if (treeGame.dailyMissions.loginReward) {
+                showNotification('Đã nhận thưởng đăng nhập hôm nay!', 'error');
+                return;
+            }
+
+            treeGame.dailyMissions.loginReward = true;
+            treeGame.freeFertilizer += 3;
+            treeGame.freeWater += 1;
+            
+            saveTreeGameData();
+            updateTreeDisplay();
+            updateDailyMissions();
+            
+            showNotification('🎉 Nhận thưởng đăng nhập: +3 lượt bón phân, +1 lượt tưới nước!', 'success');
+            addAchievement('Nhận thưởng đăng nhập hàng ngày 🎯');
+        }
+
+        function checkPurchaseMission() {
+            treeGame.dailyMissions.purchaseCount++;
+            
+            if (treeGame.dailyMissions.purchaseCount >= 3 && treeGame.dailyMissions.purchaseCount === 3) {
+                // First time completing purchase mission today
+                treeGame.freeWater += 6;
+                showNotification('🎉 Hoàn thành nhiệm vụ mua hàng: +6 lượt tưới nước!', 'success');
+                addAchievement('Hoàn thành nhiệm vụ mua 3+ sản phẩm 🛒');
+            }
+            
+            saveTreeGameData();
+            updateDailyMissions();
+            updateTreeDisplay();
+        }
+
+        function checkTopupMission(amount) {
+            const oldAmount = treeGame.dailyMissions.topupAmount;
+            treeGame.dailyMissions.topupAmount += amount;
+            
+            if (oldAmount < 100000 && treeGame.dailyMissions.topupAmount >= 100000) {
+                // First time completing topup mission today
+                treeGame.freeWater += 10;
+                showNotification('🎉 Hoàn thành nhiệm vụ nạp tiền: +10 lượt tưới nước!', 'success');
+                addAchievement('Hoàn thành nhiệm vụ nạp tiền 100K+ 💰');
+            }
+            
+            saveTreeGameData();
+            updateDailyMissions();
+            updateTreeDisplay();
+        }
+
+        // Free care functions
+        function useFreeWater() {
+            if (treeGame.freeWater <= 0) {
+                showNotification('Không còn lượt tưới nước miễn phí!', 'error');
+                return;
+            }
+
+            treeGame.freeWater--;
+            treeGame.currentExp += 100;
+            treeGame.totalExp += 100;
+
+            saveTreeGameData();
+            updateTreeDisplay();
+
+            showNotification('Đã tưới nước miễn phí! +100 EXP', 'success');
+            addAchievement('Tưới nước miễn phí (+100 EXP) 💧');
+        }
+
+        function useFreeFertilizer() {
+            if (treeGame.freeFertilizer <= 0) {
+                showNotification('Không còn lượt bón phân miễn phí!', 'error');
+                return;
+            }
+
+            treeGame.freeFertilizer--;
+            treeGame.currentExp += 1000;
+            treeGame.totalExp += 1000;
+
+            saveTreeGameData();
+            updateTreeDisplay();
+
+            showNotification('Đã bón phân miễn phí! +1000 EXP', 'success');
+            addAchievement('Bón phân miễn phí (+1000 EXP) 🌱');
+        }
+
+        // Initialize tree game on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load tree game data when user logs in
+            if (currentUser) {
+                loadTreeGameData();
+            }
+        });
+
         // Close modals when clicking outside
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('modal')) {
@@ -2865,5 +3588,5 @@
             }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98860131f2f725e5',t:'MTc1OTQyNzAzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98a6f71376f70540',t:'MTc1OTc3MjY1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
